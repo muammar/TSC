@@ -19,7 +19,7 @@ Build-Depends: debhelper (>= 9),
                libxml++2.6-dev,
                rake,
                cmake,
-               libglew-dev
+               libglew-dev,
                ruby-full,
                freeglut3-dev,
                gettext,
