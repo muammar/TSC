@@ -1,4 +1,9 @@
 #!/usr/bin/make -f
+
+GIT='https://github.com/Secretchronicles/TSC'
+# The full changelog version number, used for the orig.tar.gz
+VER=$(shell dpkg-parsechangelog -ldebian/changelog -SVersion | cut -d- -f1)
+
 %:
 	dh $@ --buildsystem=cmake --parallel
 
@@ -26,3 +31,13 @@ override_dh_auto_clean:
 	    rm -rf obj-$(DEB_BUILD_GNU_TYPE) ; \
 	fi
 	rm -rf mruby/mruby/build mruby/mruby/bin/mirb mruby/mruby/bin/mrbc mruby/mruby/bin/mruby
+
+get-orig-source:
+	rm -rf tsc-$(VER)
+	git clone $(GIT)
+	rm -rf TSC/debian
+	mv TSC tsc-$(VER)
+	rm -rf TSC
+	GZIP=--best tar --owner=root --group=root --mode a+rX -czf tsc_$(VER).orig.tar.gz  tsc-$(VER)
+	rm -rf tsc-$(VER)
+	mv tsc_$(VER).orig.tar.gz ../
