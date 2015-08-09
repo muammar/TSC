@@ -1,0 +1,240 @@
+tsc (2.0.0~rc1-1) unstable; urgency=medium
+
+  * The package has been renamed.
+  * CDBS was removed to correctly build using cmake.
+
+ -- Muammar El Khatib <muammar@debian.org>  Thu, 30 Jul 2015 18:05:59 +0200
+
+smc (1.9+git20121121-1.2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Fix "/usr/share/games/smc/gui/font/default_bold.ttf does not exist"
+    (Closes: #758427):
+     - smc-data needs to depend on fonts-dejavu-core
+     - update smc-data.links to the fonts in this package and not in the
+       transitional package ttf-dejavu-core
+  * Fix "desktop file category key is incomplete". Applying patch from Markus
+    Koschany, but omitting the character name as it could be a trademark.
+    (Closes: #738030)
+
+ -- Tobias Frost <tobi@debian.org>  Tue, 19 Aug 2014 10:08:44 +0000
+
+smc (1.9+git20121121-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Fix "boost 1.53 is going away" by removing versioned dependencies
+    on boost libraries (Closes: #731018)
+
+ -- Tobias Frost <tobi@coldtobi.de>  Sat, 11 Jan 2014 14:59:28 +0000
+
+smc (1.9+git20121121-1) unstable; urgency=low
+
+  * New upstream snapshot.
+  * Bumped standards version to 3.9.1. No changes were needed.
+  * Now SMC is compiled using the Hardening Options.
+  * debian/control:
+    + The package is built using Boost 1.53. Fixes FTBFS. (Closes: #707433)
+  * debian/compat: bump to compat level 9.
+  * debian/menu file was updated so that the game is referred to the section
+    Games/Action instead of Games/Adventure. (Closes: #680258, #709083)
+  * In this revision i18n of man page is enabled, and German translation has
+    been put in place. Thanks to Helge Kreutzmann. (Closes: #640234, #709083)
+  * debian/patches/01_configure.ac.patch has been deleted because the
+    Debian-specific "libboost_foo-mt" libraries has been removed in Boost 1.53.
+    (Closes: #710083)
+
+ -- Muammar El Khatib <muammar@debian.org>  Sat, 11 May 2013 22:51:09 +0200
+
+smc (1.9+git20120222-1) unstable; urgency=low
+
+  * New upstream snapshot.  Fixes FTBFS. (Closes: #646464)
+  * debian/control: Add libboost-thread-dev, automake, and autoconf to
+    Build-Depends field. quilt has been deleted from the Build-Depends field.
+  * debian/patches/01_configure.ac.patch: Search for boost_filesystem-mt
+    instead of boost_filesystem (as required by patch in previous Debian
+    version of the package).  Also search for boost_system so that this
+    library gets added to the linker line.
+  * debian/patches:
+    + Remove as unnecessary 01_configure.patch, 02_binutils-gold.patch,
+    03_smc_boost1.46.patch.
+  * debian/rules: Add get-orig-source rule to check out smc from git.
+    Add post-patches rule to run autogen.sh after applying the
+    configure.ac patches.
+  * Thanks to Barry Warsaw for providing a patch.
+  * German description in desktop file has been added. Thanks to Helge
+    Kreutzmann. (Closes: #640233)
+
+ -- Muammar El Khatib <muammar@debian.org>  Wed, 07 Mar 2012 22:00:51 +0100
+
+smc (1.9-4) unstable; urgency=low
+
+  * Switch to dpkg-source 3.0 (quilt) format.
+  * Bumped standards version to 3.9.1. No changes were needed.
+  * All needed libraries to the linker when building smc were added. With this
+    change smc should build correctly with binutils-gold. Thanks to  Mahyuddin
+    Susanto for providing a patch. (Closes: #556349)
+  * SMC is now able to compile with Boost 1.46. Thanks to Konstantinos
+    Margaritis for providing a patch. It was also needed to add the next to the
+    debian/rules:
+    LDFLAGS = -lboost_system
+    (Closes: #629838)
+  * Maintainer's mail has been changed.
+
+ -- Muammar El Khatib <muammar@debian.org>  Sat, 20 Aug 2011 20:18:07 +0200
+
+smc (1.9-3) unstable; urgency=low
+
+  * Bumped standards version to 3.8.4. No changes were needed in order to
+    accomplish this.
+
+ -- Muammar El Khatib <muammarelkhatib@gmail.com>  Wed, 17 Feb 2010 21:14:19 -0430
+
+smc (1.9-2) unstable; urgency=low
+
+  * debian/control: smc Build-Depends on libcegui-mk2-dev (>= 0.6.2). With
+    this change can be avoided some problems where smc is compiled using lower
+    versions of libcegui-mk2-dev. (Closes: #545260)
+
+ -- Muammar El Khatib <muammarelkhatib@gmail.com>  Tue, 13 Oct 2009 22:32:37 -0430
+
+smc (1.9-1) unstable; urgency=low
+
+  * New upstream release.
+  * Bumped standards version to 3.8.3. No changes were needed in order to
+    accomplish this.
+
+ -- Muammar El Khatib <muammarelkhatib@gmail.com>  Tue, 18 Aug 2009 11:28:01 -0430
+
+smc (1.8-1) unstable; urgency=low
+
+  * New upstream release. (Closes: #526445)
+  * Bug 'FTBFS: Nonexistent build-dependency: libboost-filesystem1.37-dev' has
+    been fixed in this revision. In order to accomplish that, smc now
+    build-depends on unversioned boost packages. (Closes: #534087, #531120)
+  * Bug 'smc: freezes machine and won't exit' is not found in this revision
+    anymore. (Closes: #488744)
+  * smc does not depend on libcegui-mk2-dev for executing properly. This
+    problem was due the fact that the CEGUI's module loading depended on .so
+    links, which were only found in the -dev package. CEGUI has been now changed
+    in order to make it use *.so.* directly. (Closes: #454679)
+  * Bumped standards version to 3.8.2
+  * smc-music package has been updated to version 4.1.
+
+ -- Muammar El Khatib <muammarelkhatib@gmail.com>  Fri, 03 Jul 2009 22:13:56 -0430
+
+smc (1.7-1) unstable; urgency=low
+
+  * New upstream release. (Closes: #511404)
+  * debian/control: smc Build-Depends on libboost-filesystem1.37-dev instead of
+    libboost-filesystem-dev.
+  * debian/control: dpatch build dependency has been added in order to make the
+    update of libboost-filesystem1.37-dev.
+  * smc is not failing anymore with undefined symbol error in CEGUI. Problem was
+    caused by a missed directory called translations under /usr/share/games/smc/
+    (Closes: #508106)
+  * smc now suggests smc-music. Thanks to Alessio Treglia for reporting this.
+    (Closes: #511660)
+  * Bug 'Segmentation fault on startup' is no longer present in this new
+    upstream version.  (Closes: #512841)
+
+ -- Muammar El Khatib <muammarelkhatib@gmail.com>  Fri, 30 Jan 2009 14:20:20 -0430
+
+smc (1.6-1) unstable; urgency=low
+
+  * New upstream release. (Closes:#479415)
+  * Bumped standards version to 3.8.0.
+  * debian/control: dpatch build dependency has been removed temporarily.
+  * debian/control: smc-data does not depend on smc anymore. This change will
+    avoid a circular dependency. (Closes: #478712)
+  * smc does not segfault. (Closes: #500039, #491590)
+  * Icon is not missed in Gnome Menu. Thanks to Saïvann for providing a
+    solution. (Closes: #491885)
+  * debian/control: smc-data's and smc-music's descriptions have been improved.
+    (Closes: #493630)
+
+ -- Muammar El Khatib <muammarelkhatib@gmail.com>  Mon, 20 Oct 2008 00:31:35 -0430
+
+smc (1.4-2) unstable; urgency=low
+
+  * Bug 'smc: Not In KDE Menu' has been fixed in this revision.
+  (Closes: #465115)
+  * Bug 'smc: Errors/warnings on the console' has been fixed in this revision.
+  (Closes: #459736)
+  * Music files have been moved to smc-music package.
+
+ -- Muammar El Khatib <muammarelkhatib@gmail.com>  Mon, 11 Feb 2008 00:14:50 -0430
+
+smc (1.4-1) unstable; urgency=low
+
+  * New upstream release
+  * A desktop file was added. Thanks to Marco Rodrigues for providing the
+    desktop file. (Closes: #456414)
+
+ -- Muammar El Khatib <muammarelkhatib@gmail.com>  Sun, 23 Dec 2007 01:55:18 -0430
+
+smc (1.3-1) unstable; urgency=low
+
+  * New upstream release.
+  * Bumped standards version to 3.7.3
+  * data/pixmaps/extra directory was erased of source tree since it didn't
+    content any file.
+
+ -- Muammar El Khatib <muammarelkhatib@gmail.com>  Tue, 04 Dec 2007 23:45:15 -0400
+
+smc (1.2-1) unstable; urgency=low
+
+  * New upstream release.(Closes: #448558)
+  * Bug:"audio is scratchy" has been fixed in this new version.
+  (Closes: #446562)
+  * Dependencies: smc is not depending on smc-data now. With this change
+    people can decide to download or not the music files.
+  * Watch file has been modified so now it's working properly.
+  * Copyright file has been changed because smc's Music files are copyrighted
+    under GPL-3
+
+ -- Muammar El Khatib <muammarelkhatib@gmail.com>  Thu, 25 Oct 2007 23:28:39 -0400
+
+smc (1.1-1) unstable; urgency=low
+
+  * New upstream release
+  * Bug: "fireballs not working after getting to new level" has been fixed in
+    this new version. (Closes: #436103)
+
+ -- Muammar El Khatib <muammarelkhatib@gmail.com>  Sat, 22 Sep 2007 01:11:06 -0400
+
+smc (1.0-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Muammar El Khatib <muammarelkhatib@gmail.com>  Sat, 28 Jul 2007 18:24:15 -0400
+
+smc (0.99.7-1) unstable; urgency=low
+
+  * New upstream release
+  * debian/control: Updated Build-Depends. (Closes: #432690)
+
+ -- Muammar El Khatib <muammarelkhatib@gmail.com>  Thu, 21 Jun 2007 00:27:36 +0100
+
+smc (0.99.6-2) unstable; urgency=low
+
+  * Acknowledge NMUs (Closes: #424667)
+  * Problems loading *.so files have been fixed in this revision of smc
+  (Closes: #423498)
+
+ -- Muammar El Khatib <muammarelkhatib@gmail.com>  Sun, 17 Jun 2007 22:08:22 +0100
+
+smc (0.99.6-1.1) unstable; urgency=low
+
+  * NMU as the maintainer doesn't have net access for this upload (Closes:
+    #423498, #424667).
+  * debian/control: Added a dependency on dpatch.
+  * debian/patches/001-configure.dpatch: Added a patch to fix boost filesystem
+    test.
+
+ -- Oleksandr Moskalenko <malex@debian.org>  Thu, 24 May 2007 08:02:16 -0600
+
+smc (0.99.6-1) unstable; urgency=low
+
+  * Initial release (Closes: #405441)
+
+ -- Muammar El Khatib <muammarelkhatib@gmail.com>  Fri, 20 Apr 2007 19:43:20 -0400

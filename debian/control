@@ -1,0 +1,54 @@
+Source: tsc
+Section: games
+Priority: optional
+Maintainer: Muammar El Khatib <muammar@debian.org>
+Build-Depends: debhelper (>= 9),
+               autotools-dev,
+               libcegui-mk2-dev (>= 0.6.2),
+               libboost-filesystem-dev,
+               libboost-thread-dev,
+               libsdl1.2-dev,
+               libsdl-image1.2-dev,
+               libsdl-mixer1.2-dev,
+               libsdl-ttf2.0-dev,
+               pkg-config,
+               ttf-dejavu,
+               autoconf,
+               automake,
+               po4a,
+               gperf,
+               bison,
+               libxml++2.6-dev,
+               rake
+Standards-Version: 3.9.4.0
+Homepage: http://www.secretmaryo.org
+
+Package: tsc
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, tsc-data (= ${source:Version})
+Suggests: tsc-music (= ${source:Version})
+Description: Jump and Run game like Super Mario World
+ Secret Maryo Chronicles is an Open Source two-dimensional platform game with
+ a style designed similar to classic sidescroller games.
+ .
+ It utilizes the platform independent library SDL and since Version 0.98 with
+ the OpenGLi accelerated Graphics Renderer developed in C++.
+
+Package: tsc-data
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, fonts-dejavu-core
+Description: levels and game data for Secret Maryo Chronicles
+ Secret Maryo Chronicles is an Open Source two-dimensional platform game with
+ a style designed similar to classic sidescroller games.
+ .
+ It provides levels, sounds and other files which are needed for playing
+ this game properly.
+
+Package: tsc-music
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, tsc (>=${source:Version}), tsc-data (=${source:Version})
+Description: music files for Secret Maryo Chronicles
+ Secret Maryo Chronicles is an Open Source two-dimensional platform game with
+ a style designed similar to classic sidescroller games.
+ .
+ It provides music for playing this game properly.
