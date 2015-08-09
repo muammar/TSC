@@ -1,0 +1,28 @@
+#!/usr/bin/make -f
+%:
+	dh $@ --buildsystem=cmake --parallel
+
+override_dh_auto_configure:
+	mkdir obj-$(DEB_BUILD_GNU_TYPE); \
+	cd obj-$(DEB_BUILD_GNU_TYPE); \
+	cmake -DCMAKE_INSTALL_PREFIX=/usr -DFIXED_DATA_DIR=/usr/share/games/tsc -DBINARY_DIR=/usr/games ../tsc
+
+override_dh_auto_build:
+	cd obj-$(DEB_BUILD_GNU_TYPE); \
+	make; \
+	cd obj-$(DEB_BUILD_GNU_TYPE); \
+	make DESTDIR=$(CURDIR)/debian/tmp/ install
+
+override_dh_install:
+	dh_install
+	po4a -v -f debian/po4a.cfg
+	cp -f debian/tsc.xpm debian/tsc/usr/share/pixmaps/tsc
+	ln -s tsc/tsc.xpm debian/tsc/usr/share/pixmaps/tsc.xpm
+	cp -f debian/tsc.desktop debian/tsc/usr/share/applications
+	cp -f debian/menu debian/tsc/usr/share/menu/tsc
+
+override_dh_auto_clean:
+	if [ -d "obj-$(DEB_BUILD_GNU_TYPE)" ]; then \
+	    rm -rf obj-$(DEB_BUILD_GNU_TYPE) ; \
+	fi
+	rm -rf mruby/mruby/build mruby/mruby/bin/mirb mruby/mruby/bin/mrbc mruby/mruby/bin/mruby

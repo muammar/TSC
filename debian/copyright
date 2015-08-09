@@ -1,0 +1,41 @@
+This package was debianized by Muammar El Khatib <muammarelkhatib@gmail.com> on
+Fri, 20 Apr 2007 19:43:20 -0400
+
+It was downloaded from: http://www.secretmaryo.org/
+
+Upstream Author: Florian Richter, Boder and The TSC Team
+
+Copyright: © 2003 - 2008 Florian Richter
+Copyright © 2013-2015 The TSC Contributors
+
+License:
+
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ as published by the Free Software Foundation; either version 2
+ of the License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+The Debian packaging is © 2007, Muammar El Khatib <muammarelkhatib@gmail.com>
+and is licensed under the GPL Version 2, see `/usr/share/common-licenses/GPL-2'.
+
+License (TSC's Music files):
+
+Version 3, 29 June 2007
+
+Copyright © 2007 Free Software Foundation, Inc. <http://fsf.org/>
+
+Everyone is permitted to copy and distribute verbatim copies of this license
+document, but changing it is not allowed.
+
+The Debian packaging is © 2007, Muammar El Khatib <muammarelkhatib@gmail.com>
+and is licensed under the GPL Version 3, see `/usr/share/common-licenses/GPL-3'.
