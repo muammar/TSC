@@ -27,8 +27,8 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, tsc-data (= ${source:Version})
 Suggests: tsc-music (= ${source:Version})
 Description: Jump and Run game like Super Mario World
- Secret Maryo Chronicles is an Open Source two-dimensional platform game with
- a style designed similar to classic sidescroller games.
+ The Secret Chronicles of Dr. M. is an Open Source two-dimensional platform
+ game with a style designed similar to classic sidescroller games.
  .
  It utilizes the platform independent library SDL and since Version 0.98 with
  the OpenGLi accelerated Graphics Renderer developed in C++.
@@ -36,18 +36,18 @@ Description: Jump and Run game like Super Mario World
 Package: tsc-data
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, fonts-dejavu-core
-Description: levels and game data for Secret Maryo Chronicles
- Secret Maryo Chronicles is an Open Source two-dimensional platform game with
- a style designed similar to classic sidescroller games.
+Description: levels and game data for The Secret Chronicles of Dr. M.
+ The Secret Chronicles of Dr. M. is an Open Source two-dimensional platform
+ game with a style designed similar to classic sidescroller games.
  .
- It provides levels, sounds and other files which are needed for playing
- this game properly.
+ It provides levels, sounds and other files which are needed for playing this
+ game properly.
 
 Package: tsc-music
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, tsc (>=${source:Version}), tsc-data (=${source:Version})
-Description: music files for Secret Maryo Chronicles
- Secret Maryo Chronicles is an Open Source two-dimensional platform game with
- a style designed similar to classic sidescroller games.
+Description: music files for The Secret Chronicles of Dr. M.
+ The Secret Chronicles of Dr. M. is an Open Source two-dimensional platform
+ game with a style designed similar to classic sidescroller games.
  .
  It provides music for playing this game properly.
