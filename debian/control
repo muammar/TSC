@@ -13,13 +13,12 @@ Build-Depends: debhelper (>= 9),
                libsdl-ttf2.0-dev,
                pkg-config,
                ttf-dejavu,
-               autoconf,
-               automake,
                po4a,
                gperf,
                bison,
                libxml++2.6-dev,
-               rake
+               rake,
+               cmake
 Standards-Version: 3.9.4.0
 Homepage: http://www.secretmaryo.org
 
