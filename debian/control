@@ -6,11 +6,7 @@ Build-Depends: debhelper (>= 9),
                libcegui-mk2-dev (>= 0.6.2),
                libboost-filesystem-dev,
                libboost-thread-dev,
-<<<<<<< HEAD
                libboost1.58-all-dev,
-=======
-               libboost1.55-all-dev,
->>>>>>> 09178f14614a469971b6c8cc42528ec3dd7e3682
                libsdl1.2-dev,
                libsdl-image1.2-dev,
                libsdl-mixer1.2-dev,
