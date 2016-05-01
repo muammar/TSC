@@ -2,3 +2,7 @@
 version=3
 opts=filenamemangle=s/.+\/v?(\d\S*)\.tar\.gz/<project>-$1\.tar\.gz/ \
   https://github.com/Secretchronicles/TSC/tags .*/v?(\d\S*)\.tar\.gz
+<<<<<<< HEAD
+=======
+
+>>>>>>> 09178f14614a469971b6c8cc42528ec3dd7e3682

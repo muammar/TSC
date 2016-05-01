@@ -1,7 +1,14 @@
+<<<<<<< HEAD
 # Translation of SMC manual page to German
 # Copyright (C) Helge Kreutzmann <debian@helgefjell.de>, 2013.
 # This file is distributed under the same license as the smc package
 #
+=======
+# Translation of SMC manual page to German
+# Copyright (C) Helge Kreutzmann <debian@helgefjell.de>, 2013.
+# This file is distributed under the same license as the smc package
+# 
+>>>>>>> 09178f14614a469971b6c8cc42528ec3dd7e3682
 #, fuzzy
 msgid ""
 msgstr ""
