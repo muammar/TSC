@@ -14,11 +14,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "../core/global_basic.hpp"
 #include "../video/font.hpp"
 #include "../video/gl_surface.hpp"
 #include "../core/property_helper.hpp"
 #include "../core/filesystem/resource_manager.hpp"
-#include "../core/global_basic.hpp"
 #include "../core/game_core.hpp"
 #include "renderer.hpp"
 
@@ -39,7 +39,7 @@ cFont_Manager::~cFont_Manager(void)
 
 void cFont_Manager::Init(void)
 {
-    if (!m_font_normal.loadFromFile(path_to_utf8(pResource_Manager->Get_Gui_Font_Directory() / utf8_to_path("default_bold.ttf")))) {
+    if (!m_font_normal.loadFromFile(path_to_utf8(pResource_Manager->Get_Gui_Font_Directory() / utf8_to_path("DejaVuSans-Bold.ttf")))) {
         // FIXME: Throw a proper exception
         throw "Font loading failed";
     }

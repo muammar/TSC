@@ -25,6 +25,7 @@
 #include "../property_helper.hpp"
 #include "../errors.hpp"
 #include "../global_basic.hpp"
+#include "../../user/preferences.hpp"
 
 using namespace std;
 
@@ -137,6 +138,12 @@ fs::path cResource_Manager::Get_User_Campaign_Directory()
 fs::path cResource_Manager::Get_User_Imgcache_Directory()
 {
     return m_paths.user_cache_dir / utf8_to_path(USER_IMGCACHE_DIR);
+}
+
+fs::path cResource_Manager::Get_User_Pixmaps_Directory()
+{
+    std::string resolution = int_to_string(pPreferences->m_video_screen_w) + "x" + int_to_string(pPreferences->m_video_screen_h);
+    return Get_User_Imgcache_Directory() / utf8_to_path(resolution);
 }
 
 fs::path cResource_Manager::Get_User_CEGUI_Logfile()
@@ -277,18 +284,10 @@ fs::path cResource_Manager::Get_Preferences_File()
 void cResource_Manager::init_directories()
 {
     ////////// The (usually unwritable) game data directory //////////
-#ifdef FIXED_DATA_DIR
-    m_paths.game_data_dir = utf8_to_path(FIXED_DATA_DIR);
-#else
-#ifdef __unix__
-    char path_data[PATH_MAX];
-    int count;
-    count = readlink("/proc/self/exe", path_data, PATH_MAX);
-    if (count < 0)
-        throw(ConfigurationError("Failed to retrieve the executable's path from /proc/self/exe!"));
-
-    m_paths.game_data_dir = utf8_to_path(std::string(path_data, count)).parent_path().parent_path() / utf8_to_path("share") / utf8_to_path("tsc");
-#elif _WIN32
+#ifdef _WIN32
+    // Windows has no standard pathes like Unix systems do. So
+    // instead determine the resource path relative to the running
+    // executable and force the user to use this directory layout.
     wchar_t path_data[MAX_PATH];
     if (GetModuleFileNameW(NULL, path_data, MAX_PATH) == 0)
         throw(ConfigurationError("Failed to retrieve the executable's path from the Win32API!"));
@@ -296,8 +295,17 @@ void cResource_Manager::init_directories()
 
     m_paths.game_data_dir = utf8_to_path(utf8_path).parent_path().parent_path() / utf8_to_path("share") / utf8_to_path("tsc");
 #else
-#error Dont know how to retrieve the path to the running executable on this system!
-#endif
+    // Use the path configured at build time. If it is relative, construct
+    // it from the install prefix, if it is absolute, take it as is.
+    boost::filesystem::path datadir = utf8_to_path(INSTALL_DATADIR);
+
+    if (datadir.is_relative())
+        datadir = utf8_to_path(INSTALL_PREFIX) / datadir;
+
+    // Append our program-specific subdirectory
+    datadir /= utf8_to_path("tsc");
+
+    m_paths.game_data_dir = datadir;
 #endif
 
     ////////// The (writeable) user directories //////////

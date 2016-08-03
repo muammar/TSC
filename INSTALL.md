@@ -1,12 +1,14 @@
 Installation instructions for TSC
 =================================
 
+Time-stamp: <2016-08-03 10:13:02 quintus>
+
 TSC uses [CMake][1] as the build system, so the first thing you have to
 ensure is that you have CMake installed.
 
-TSC currently supports the Linux and Windows platforms officially. To
-be more exact, it is tested against Arch Linux and Windows 7. The
-current Ubuntu LTS should also work. **Windows XP is unsupported**.
+TSC supports the Linux and Windows platforms officially.
+On Windows, testing is done on Windows 7.
+**Windows XP is unsupported**.
 
 TSC can be installed either from Git, meaning that you clone the
 repository, or from a release tarball, where for the purpose of this
@@ -17,14 +19,49 @@ after we have had a look on the dependencies. Note that if you want
 to crosscompile, you should probably read this entire file and not
 just the section on crosscompilation to get a better understanding.
 
-Dependencies
-------------
+Installation instructions tailored specifically towards compiling TSC
+from Git on Lubuntu 16.10 can be found in the separate file
+tsc/docs/pages/compile_on_lubuntu_16_10.md.
+
+Contents
+--------
+
+I. Dependencies
+    1. Common dependencies
+    2. Linux dependencies
+    3. Windows dependencies
+II. Configuration options
+III. Installing from a released tarball
+IV. Installing from Git
+V. Upgrade notices
+VI. Crosscompiling from Linux to Windows
+    1. Crosscompiling from a released tarball
+    2. Crosscompiling from Git
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+I. Dependencies
+----------------
 
 In any case, you will have to install a number of dependencies before
 you can try installing TSC itself. The following sections list the
 dependencies for each supported system.
 
-### Common dependencies ###
+
+
+
+### 1. Common dependencies ###
 
 The following dependencies are required regardless of the system you
 install to.
@@ -40,57 +77,140 @@ install to.
 * The libPCRE regular expression library.
 * The libxml++ library.
 * The Freetype library.
+* CEGUI >= 0.8.5
+  * Lower versions of CEGUI do not work due to CEGUI bug #1063
+    (incompatibility with a new version of glm), which was resolved
+    first with CEGUI 0.8.5.
+  * Before starting to compile the most recent CEGUI, you should try
+    with your distibutions's CEGUI if it is >= 0.8.0. Chances are that
+    you are not subject to the glm bug and it might just work fine for
+    you. If the game appears to have no menus, then you *are* subject
+    to the glm bug and you *need* a newer CEGUI.
 * Boost >= 1.50.0 (to be exact: boost_system, boost_filesystem, boost_thread)
-* Simple and fast cross-platform multimedia library `libsfml-dev` 
-* For generating the docs:
+* SFML >= 2.3.0
+* Optionally for generating the docs:
   * `kramdown` RubyGem.
   * The `coderay` RubyGem.
   * The `dot` program.
   * The `doxygen` program.
   * Ruby’s `rdoc` program.
 
-### Linux dependencies ###
+
+
+
+### 2. Linux dependencies ###
 
 * The DevIL library.
 
-Additionally, TSC needs CEGUI version 0.7.x. However, as this old
-version is not provided by most modern Linux distributions anymore, the
-build system has been set up to download and compile it on its own and
-then link it in statically. **For Windows** (see below) this does not
-hold true, you have to provide CEGUI 0.7.x libraries yourself (or just
-use MXE as described below). We are working on the issue and hope to
-get it resolved with the next feature release of TSC.
+#### Example for Ubuntu ####
 
-The following commandline installs all dependencies required to built
-TSC on Ubuntu Linux 14.04:
+(specific instructions for Lubuntu 16.10 can be found in
+tsc/docs/pages/compile_on_lubuntu_16_10.md).
+
+Install core dependencies:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# apt-get install ruby-full rake gperf pkg-config bison libglew-dev \
-  freeglut3-dev gettext libpng12-dev libpcre3-dev libxml++2.6-dev \
-  libfreetype6-dev libdevil-dev libboost1.55-all-dev libsfml-dev
+sudo apt install ruby-full rake gperf pkg-config bison libglew-dev \
+  freeglut3-dev gettext libpng-dev libpcre3-dev libxml++2.6-dev \
+  libfreetype6-dev libdevil-dev libboost1.58-all-dev libsfml-dev \
+  libcegui-mk2-dev cmake build-essential git git-core
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Windows dependencies ###
+Install rubygems for documentation generation etc (optional; you need
+this only if you want the docs):
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sudo gem install kramdown coderay
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+
+### 3. Windows dependencies ###
 
 * The FreeImage library.
-* CEGUI version 0.7.x. CEGUI 0.8.x is not yet supported.
 * For generating a setup installer:
   * The NSIS tools.
 
-Configuration options
----------------------
+
+
+
+
+
+
+
+
+
+
+
+
+II. Configuration options
+-------------------------
 
 This section describes possible configuration you may apply before
 building. If you just want to build the game, you can skip it. If you
 want custom configuration or want to package it for e.g. a Linux
-distribution, read on.
+distribution, read on. Each of the flags described in this section
+needs to be passed when invoking cmake by use of a `-D` option,
+e.g. `-DENABLE_EDITOR=OFF`. Default values are indicated in brackets.
 
-You may pass the following optional variables to the `cmake` command:
+The following options are available:
 
-* `FIXED_DATA_DIR=/some/dir`: Overrides the default installation path for the
-  game data with this fixed directory.
-* `BINARY_DIR=/some/dir`: Overrides the default installation path for
-  the game binary.
+ENABLE_EDITOR [ON]
+: Enables or disables the in-game editor. Switching this off is not
+  yet supported.
+
+ENABLE_MRUBY [ON]
+: Enables or disables the scripting engine. Switching this off is not
+  yet supported.
+
+ENABLE_NLS [ON]
+: Enables or disables use of translations. If disabled, TSC will use
+  English only.
+
+USE_SYSTEM_TINYCLIPBOARD [OFF]
+: For clipboard access, TSC uses the `tinyclipboard` library written
+  by Marvin Gülker (Quintus). The library is not part of many Linux
+  distributions yet, so it is build as part of building TSC itself
+  as a static library. If you *are* on a Linux distribution where
+  this library is packaged, set this value to ON and the build
+  system will dynamically link to the tinyclipboard library of
+  the system and not build its own variant.
+
+The following path options are available:
+
+CMAKE_INSTALL_PREFIX [/usr/local]
+: Prefix value for all other CMAKE_INSTALL variables.
+
+CMAKE_INSTALL_BINDIR [(prefix)/bin]
+: Binary directory, i.e. where the `tsc` executable will be installed.
+  Do not change this option when compiling for Windows (see below
+  for further information).
+
+CMAKE_INSTALL_DATADIR [(prefix)/share]
+: Directory where the main data (levels, graphics, etc.) will be
+  installed. Do not change this option when compiling for
+  Windows (see below for further information).
+
+CMAKE_INSTALL_DATAROOTDIR [(prefix)/share]
+: Installation target of non-program-specific data, namely the
+  `.desktop` starter file, icons and the manpage by default.
+  Only change this if you have good reasons.
+
+CMAKE_INSTALL_MANDIR [(datarootdir)/man]
+: Where TSC will install its manpage under. Note that the
+  installer will create a subdirectory `man6`, i.e. the
+  manpage is installed into (mandir)/man6/tsc.6.
+
+**Do not change CMAKE_INSTALL_BINDIR or CMAKE_INSTALL_DATADIR when
+compiling for Windows**! The `tsc` executable when run on Windows
+searches for the data directory relative to its own path on the
+filesystem, and it assumes the default layout. If you change this
+option, the `tsc` executable will be unable to locate the data
+directory and crash. On all other systems, the `tsc` executable will
+take value of `CMAKE_INSTALL_DATADIR` as the data directory, hence you
+can change it to your likening (handy for Linux distribution
+packagers).
 
 Especially if you are packaging, you will most likely also find it
 useful to execute the install step like this:
@@ -102,8 +222,20 @@ make DESTDIR=/some/dir install
 This will shift the file system root for installation to `/some/dir`
 so that all pathes you gave to `cmake` will be below that path.
 
-Installing from a released tarball
-----------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+III. Installing from a released tarball
+----------------------------------------
 
 Extract the tarball, create a directory for the build and switch into
 it:
@@ -138,8 +270,20 @@ TSC.
 $ /opt/tsc/bin/tsc
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Installing from Git
--------------------
+
+
+
+
+
+
+
+
+
+
+
+
+IV. Installing from Git
+-----------------------
 
 Installing from Git basically works the same way as the normal release
 install, but with a few preparations needed. You have to clone the
@@ -156,8 +300,69 @@ $ git submodule update
 From there on, you can continue with the normal instructions as per
 the above section.
 
-Crosscompiling from Linux to Windows
-------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+V. Upgrade notices
+------------------
+
+Before upgrading TSC to a newer released version or new development
+version from Git, you may want to make a backup of your locally
+created levels and worlds. You can do this by copying the directory
+`~/.locals/share/tsc` to a safe place.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$ cp -r ~/.local/share/tsc ~/backup-tsc
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To upgrade your Git copy of TSC:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$ git pull
+$ git submodule update
+$ cmake ..
+$ make
+$ make install
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you switch branches (maybe because you want to test a specific new
+feature not merged into `devel` yet), it is recommended to clean the
+build directory as well.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$ cd ..
+$ git checkout feature-branch
+$ rm -rf build
+$ mkdir build
+$ cd build
+$ cmake [OPTIONS] ..
+$ make
+$ make install
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+
+
+
+
+
+
+
+
+
+
+VI. Crosscompiling from Linux to Windows
+-----------------------------------------
 
 TSC can be crosscompiled from Linux to Windows, such that you don’t
 have to even touch a Windows system in order to generate the
@@ -202,7 +407,10 @@ new task to MXE’s makefile to correct that, which you now need to run:
 $ make fixcmakelinks
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Crosscompiling from a released tarball ###
+
+
+
+### 1. Crosscompiling from a released tarball ###
 
 Crosscompiling from Linux to Windows works similar as native
 compilation, except you have to tell CMake where your crosscompilation
@@ -278,7 +486,10 @@ the setup installer. Uninstall any previous version of TSC before
 installing with another setup installer; the standalone approach does
 not suffer from this problem.
 
-### Crosscompiling from Git ###
+
+
+
+### 2. Crosscompiling from Git ###
 
 Clone the Git repository and execute the preparation steps. They are
 the same as for a normal non-cross build.

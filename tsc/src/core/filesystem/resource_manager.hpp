@@ -34,10 +34,17 @@ namespace TSC {
     /* This class manages TSC’s resource paths for graphics and other stuff.
      * It is divided in two parts: The files included with TSC itself,
      * and the files created by the user. The game files directory is usually
-     * not writeable; it is determined by looking at the path of the running
-     * executable and applying "../../share/tsc" to it. If you don’t like this,
-     * you can define the FIXED_DATA_DIR macro at compile time and point it
-     * somewhere else.
+     * not writeable; it is determined
+     *
+     * a) on Windows by looking at the path of the running
+     * executable and applying "../../share/tsc" to it, or
+     *
+     * b) on any other system by assuming the data resides in
+     * TSC_DATA_DIR, which is set to the value of the
+     * CMAKE_INSTALL_DATADIR option given at compile time plus "/tsc"
+     * appended to it (see config.hpp.in). CMAKE_INSTALL_DATADIR
+     * defaults to CMAKE_INSTALL_PREFIX plus "share" if not given.
+     *
      * The user directory is determined at runtime platform-specifically.
      */
     class cResource_Manager {
@@ -98,6 +105,7 @@ namespace TSC {
         boost::filesystem::path Get_User_World_Directory();
         boost::filesystem::path Get_User_Campaign_Directory();
         boost::filesystem::path Get_User_Imgcache_Directory();
+        boost::filesystem::path Get_User_Pixmaps_Directory();
         boost::filesystem::path Get_User_CEGUI_Logfile();
 
         // Get files from the various directories in the user’s data directory
