@@ -10,7 +10,7 @@ VER=$(shell dpkg-parsechangelog -ldebian/changelog -SVersion | cut -d- -f1)
 override_dh_auto_configure:
 	mkdir obj-$(DEB_BUILD_GNU_TYPE); \
 	cd obj-$(DEB_BUILD_GNU_TYPE); \
-	cmake -DCMAKE_INSTALL_PREFIX=/usr -DFIXED_DATA_DIR=/usr/share/games/tsc -DBINARY_DIR=/usr/games ../tsc
+	cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_DATADIR=/usr/share/games -DCMAKE_INSTALL_BINDIR=/usr/games ../tsc
 
 override_dh_auto_build:
 	cd obj-$(DEB_BUILD_GNU_TYPE); \
