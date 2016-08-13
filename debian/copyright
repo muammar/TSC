@@ -1,12 +1,12 @@
 This package was debianized by Muammar El Khatib <muammar@debian.org> on
-Fri, 20 Apr 2007 19:43:20 -0400
+Sat, 13 Aug 2016 19:43:20 +0200
 
 It was downloaded from: http://www.secretchronicles.de/en/
 
 Upstream Author: Florian Richter, Boder and The TSC Team
 
 Copyright: © 2003 - 2008 Florian Richter
-Copyright © 2013-2015 The TSC Contributors
+Copyright © 2013-2016 The TSC Contributors
 
 License:
 
@@ -37,5 +37,5 @@ Copyright © 2007 Free Software Foundation, Inc. <http://fsf.org/>
 Everyone is permitted to copy and distribute verbatim copies of this license
 document, but changing it is not allowed.
 
-The Debian packaging is © 2007, Muammar El Khatib <muammar@debian.org>
+The Debian packaging is © 2016, Muammar El Khatib <muammar@debian.org>
 and is licensed under the GPL Version 3, see `/usr/share/common-licenses/GPL-3'.

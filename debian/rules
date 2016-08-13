@@ -41,6 +41,10 @@ get-orig-source:
 	rm -rf tsc-$(VER)
 	git clone $(GIT)
 	rm -rf TSC/debian
+	cd TSC
+	git submodule init
+	git submodule update
+	cd ..
 	mv TSC tsc-$(VER)
 	rm -rf TSC
 	GZIP=--best tar --owner=root --group=root --mode a+rX -czf tsc_$(VER).orig.tar.gz  tsc-$(VER)

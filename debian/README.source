@@ -1,12 +1,4 @@
-This package has been repackaged to remove the bzip2 compression and to add
-music files.
-It also was made to achieve a better compression, and to follow what Debian
-policy says about compressions that are differents to gzip. Also, docs/licenses
-directory was deleted from upstream tarball since it included licenses of
-software smc links against.
+This package has been cloned from github, and compressed in a tarball that
+complies with Debian policy.
 
-data/pixmaps/extra directory was erased of source tree since it didn't
-content any file. It was made to avoid a lintian Error. A directory empty and
-unused is considered a mistake.
-
- -- Muammar El Khatib <muammarelkhatib@gmail.com> Fri, 20 Apr 2007 19:43:20 -0400
+ -- Muammar El Khatib <muammar@debian.org> Sat, 13 Apr 2016 19:43:20 +0200
