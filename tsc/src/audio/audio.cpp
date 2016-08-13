@@ -387,6 +387,7 @@ bool cAudio::Play_Music(fs::path filename, bool loops /* = false */, bool force 
         if (!m_music_old) {
             m_music_old = m_music;
             m_music = new sf::Music;
+            m_music->setVolume(m_music_old->getVolume());
         }
 
         // load the wanted next playing music
@@ -657,7 +658,7 @@ void cAudio::Set_Sound_Volume(uint8_t volume)
 void cAudio::Set_Music_Volume(uint8_t volume)
 {
     // not active
-    if (!m_initialised) {
+    if (!m_initialised || !m_music_enabled) {
         return;
     }
 
@@ -667,6 +668,9 @@ void cAudio::Set_Music_Volume(uint8_t volume)
     }
 
     m_music->setVolume(volume);
+    if (m_music_old && m_music_old->getStatus() == sf::Sound::Playing) {
+        m_music_old->setVolume(volume);
+    }
 }
 
 void cAudio::Update(void)
