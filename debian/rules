@@ -5,9 +5,9 @@ GIT='https://github.com/Secretchronicles/TSC'
 VER=$(shell dpkg-parsechangelog -ldebian/changelog -SVersion | cut -d- -f1)
 
 # Hardening options.
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 DPKG_EXPORT_BUILDFLAGS = 1
 include /usr/share/dpkg/buildflags.mk
-hardening=+all
 
 %:
 	dh $@ --buildsystem=cmake --parallel
