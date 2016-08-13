@@ -4,6 +4,10 @@ GIT='https://github.com/Secretchronicles/TSC'
 # The full changelog version number, used for the orig.tar.gz
 VER=$(shell dpkg-parsechangelog -ldebian/changelog -SVersion | cut -d- -f1)
 
+# Hardening options.
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/buildflags.mk
+
 %:
 	dh $@ --buildsystem=cmake --parallel
 

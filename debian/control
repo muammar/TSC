@@ -29,7 +29,7 @@ Build-Depends: debhelper (>= 9),
                libfreetype6-dev,
                libdevil-dev,
                libsfml-dev
-Standards-Version: 3.9.4.0
+Standards-Version: 3.9.8.0
 Homepage: http://www.secretchronicles.de/en/
 
 Package: tsc
