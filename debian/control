@@ -3,24 +3,18 @@ Section: games
 Priority: optional
 Maintainer: Muammar El Khatib <muammar@debian.org>
 Build-Depends: debhelper (>= 9),
-               libcegui-mk2-dev (>= 0.6.2),
+               libcegui-mk2-dev (>= 0.8.5),
                libboost-filesystem-dev,
                libboost-thread-dev,
                libboost1.61-all-dev,
-               libsdl1.2-dev,
-               libsdl-image1.2-dev,
-               libsdl-mixer1.2-dev,
-               libsdl-ttf2.0-dev,
                pkg-config,
                ttf-dejavu,
                po4a,
                gperf,
                bison,
                libxml++2.6-dev,
-               rake,
                cmake,
                libglew-dev,
-               ruby-full,
                freeglut3-dev,
                gettext,
                libpng-dev,
@@ -39,9 +33,6 @@ Suggests: tsc-music (= ${source:Version})
 Description: Jump and Run game like Super Mario World
  The Secret Chronicles of Dr. M. is an Open Source two-dimensional platform
  game with a style designed similar to classic sidescroller games.
- .
- It utilizes the platform independent library SDL and since Version 0.98 with
- the OpenGLi accelerated Graphics Renderer developed in C++.
 
 Package: tsc-data
 Architecture: all
