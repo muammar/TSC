@@ -39,14 +39,16 @@ override_dh_auto_clean:
 
 get-orig-source:
 	rm -rf tsc-$(VER)
-	git clone $(GIT)
-	rm -rf TSC/debian
-	cd TSC
+	rm -f git_archive_all.py
+	wget https://raw.githubusercontent.com/Kentzo/git-archive-all/master/git_archive_all.py
+	git clone $(GIT) tsc-$(VER)
+	cd tsc-$(VER)
 	git submodule init
 	git submodule update
+	python git_archive_all.py tsc-$(VER).tar
+	mv tsc-$(VER).tar tsc_$(VER).orig.tar
+	gzip --best tsc_$(VER).orig.tar
 	cd ..
-	mv TSC tsc-$(VER)
-	rm -rf TSC
-	GZIP=--best tar --owner=root --group=root --mode a+rX -czf tsc_$(VER).orig.tar.gz  tsc-$(VER)
-	rm -rf tsc-$(VER)
 	mv tsc_$(VER).orig.tar.gz ../
+	rm -rf tsc-$(VER)
+	rm -f git_archive_all.py
