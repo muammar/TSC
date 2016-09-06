@@ -30,3 +30,24 @@ that will not allow the asset to be used outside of the game.
 
 The Debian packaging is © 2016, Muammar El Khatib <muammar@debian.org>
 and is licensed under the GPL Version 3, see `/usr/share/common-licenses/GPL-3'.
+
+Files: tsc/extras/icons/tsc_icon_48.png
+       tsc/extras/icons/tsc_icon_16.png
+       tsc/extras/icons/tsc_icon_128.png
+       tsc/extras/icons/tsc_icon_32.png
+       tsc/extras/icons/tsc_icon_64.png
+       tsc/data/icon/window_icon.png
+       tsc/data/sounds/enemy/larry/red/die.ogg
+       tsc/data/sounds/enemy/krush/die.ogg
+       tsc/data/music/land/land_5.ogg
+       tsc/data/music/land/land_2.ogg
+       tsc/data/music/land/ragtime_1.ogg
+       tsc/data/music/land/lost.ogg
+       tsc/data/music/land/castle_2.ogg
+       tsc/data/music/land/ghost_2.ogg
+       tsc/data/music/land/reunion_1.ogg
+       tsc/data/music/game/bossbattle_3.ogg
+       tsc/data/music/game/battle.ogg
+License: CC-BY-SA 4.0
+You should have received a copy of the license along with this
+work. If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
