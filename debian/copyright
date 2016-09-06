@@ -31,23 +31,66 @@ License: GPL-3+
 The Debian packaging is © 2016, Muammar El Khatib <muammar@debian.org>
 and is licensed under the GPL Version 3, see `/usr/share/common-licenses/GPL-3'.
 
+Files: tsc/data/sounds/enemy/larry/red/die.ogg
+Copyright: Stephen M Cameron
+License CC-BY-SA 3.0
+
+Files: tsc/data/music/land/reunion_1.ogg
+Copyright: Naerbu
+License: CC-BY-SA 3.0
+ THE WORK (AS DEFINED BELOW) IS PROVIDED UNDER THE TERMS OF THIS CREATIVE
+ COMMONS PUBLIC LICENSE ("CCPL" OR "LICENSE"). THE WORK IS PROTECTED BY
+ COPYRIGHT AND/OR OTHER APPLICABLE LAW. ANY USE OF THE WORK OTHER THAN AS
+ AUTHORIZED UNDER THIS LICENSE OR COPYRIGHT LAW IS PROHIBITED.
+.
+ BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED HERE, YOU ACCEPT AND AGREE TO BE
+ BOUND BY THE TERMS OF THIS LICENSE. TO THE EXTENT THIS LICENSE MAY BE
+ CONSIDERED TO BE A CONTRACT, THE LICENSOR GRANTS YOU THE RIGHTS CONTAINED HERE
+ IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH TERMS AND CONDITIONS.
+
+You should have received a copy of the license along with this
+work. If not, see <http://creativecommons.org/licenses/by-sa/3.0/>.
+
 Files: tsc/extras/icons/tsc_icon_48.png
        tsc/extras/icons/tsc_icon_16.png
        tsc/extras/icons/tsc_icon_128.png
        tsc/extras/icons/tsc_icon_32.png
        tsc/extras/icons/tsc_icon_64.png
        tsc/data/icon/window_icon.png
-       tsc/data/sounds/enemy/larry/red/die.ogg
-       tsc/data/sounds/enemy/krush/die.ogg
-       tsc/data/music/land/land_5.ogg
-       tsc/data/music/land/land_2.ogg
-       tsc/data/music/land/ragtime_1.ogg
-       tsc/data/music/land/lost.ogg
-       tsc/data/music/land/castle_2.ogg
-       tsc/data/music/land/ghost_2.ogg
-       tsc/data/music/land/reunion_1.ogg
-       tsc/data/music/game/bossbattle_3.ogg
-       tsc/data/music/game/battle.ogg
+Copyright: sydneyjd
 License: CC-BY-SA 4.0
+
+Files: tsc/data/sounds/enemy/krush/die.ogg
+Copyright: Supertux
+License: CC-BY-SA 4.0
+
+Files: tsc/data/music/land/land_5.ogg
+       tsc/data/music/land/land_2.ogg
+Copyright: atrick Friel
+License: CC-BY-SA 4.0
+
+Files: tsc/data/music/land/ragtime_1.ogg
+Copyright: Johan Brodd
+License: CC-BY-SA 4.0
+
+Files: tsc/data/music/land/castle_2.ogg
+       tsc/data/music/land/ghost_2.ogg
+       tsc/data/music/land/lost.ogg
+Copyright: Aakburns
+License: CC-BY-SA 4.0
+
+Files: tsc/data/music/game/battle.ogg
+Copyright: Ryan Gonzalez (kirbyfan64sos)
+License: CC-BY-SA 4.0
+ THE WORK (AS DEFINED BELOW) IS PROVIDED UNDER THE TERMS OF THIS CREATIVE
+ COMMONS PUBLIC LICENSE ("CCPL" OR "LICENSE"). THE WORK IS PROTECTED BY
+ COPYRIGHT AND/OR OTHER APPLICABLE LAW. ANY USE OF THE WORK OTHER THAN AS
+ AUTHORIZED UNDER THIS LICENSE OR COPYRIGHT LAW IS PROHIBITED.
+.
+ BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED HERE, YOU ACCEPT AND AGREE TO BE
+ BOUND BY THE TERMS OF THIS LICENSE. TO THE EXTENT THIS LICENSE MAY BE
+ CONSIDERED TO BE A CONTRACT, THE LICENSOR GRANTS YOU THE RIGHTS CONTAINED HERE
+ IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH TERMS AND CONDITIONS.
+
 You should have received a copy of the license along with this
 work. If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
