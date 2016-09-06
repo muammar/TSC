@@ -27,9 +27,9 @@ License: GPL-3+
  tsc/docs/pages/old_smc_contribution_license.md. Assets that are licensed as
  "special" have been granted to the TSC team under special licensing conditions
  that will not allow the asset to be used outside of the game.
-
-The Debian packaging is © 2016, Muammar El Khatib <muammar@debian.org>
-and is licensed under the GPL Version 3, see `/usr/share/common-licenses/GPL-3'.
+ .
+ The Debian packaging is © 2016, Muammar El Khatib <muammar@debian.org>
+ and is licensed under the GPL Version 3, see `/usr/share/common-licenses/GPL-3'.
 
 Files: tsc/data/sounds/enemy/larry/red/die.ogg
 Copyright: Stephen M Cameron
@@ -86,11 +86,11 @@ License: CC-BY-SA 4.0
  COMMONS PUBLIC LICENSE ("CCPL" OR "LICENSE"). THE WORK IS PROTECTED BY
  COPYRIGHT AND/OR OTHER APPLICABLE LAW. ANY USE OF THE WORK OTHER THAN AS
  AUTHORIZED UNDER THIS LICENSE OR COPYRIGHT LAW IS PROHIBITED.
-.
+ .
  BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED HERE, YOU ACCEPT AND AGREE TO BE
  BOUND BY THE TERMS OF THIS LICENSE. TO THE EXTENT THIS LICENSE MAY BE
  CONSIDERED TO BE A CONTRACT, THE LICENSOR GRANTS YOU THE RIGHTS CONTAINED HERE
  IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH TERMS AND CONDITIONS.
-
-You should have received a copy of the license along with this
-work. If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
+ .
+ You should have received a copy of the license along with this
+ work. If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.

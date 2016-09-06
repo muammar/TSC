@@ -20,7 +20,6 @@ Build-Depends: debhelper (>= 9),
                gettext,
                libpng-dev,
                libpcre3-dev,
-               libxml++2.6-dev,
                libfreetype6-dev,
                libdevil-dev,
                libsfml-dev
@@ -48,7 +47,7 @@ Description: Jump and Run game like Super Mario World
 Package: tsc-data
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, fonts-dejavu-core
-Description: levels and game data for TSC
+Description: Levels and game data for TSC
  The Secret Chronicles of Dr. M. is an Open Source two-dimensional platform
  game with a style designed similar to classic sidescroller games.
  .
@@ -58,7 +57,7 @@ Description: levels and game data for TSC
 Package: tsc-music
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, tsc (>=${source:Version}), tsc-data (=${source:Version})
-Description: music files for TSC
+Description: Music files for TSC
  The Secret Chronicles of Dr. M. is an Open Source two-dimensional platform
  game with a style designed similar to classic sidescroller games.
  .
