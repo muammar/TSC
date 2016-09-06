@@ -17,16 +17,16 @@ License: GPL-3+
  GNU General Public License for more details.
  .
  You should have received a copy of the GNU General Public License
-
-Graphics, music, and any other artistic content in the game is not licensed
-under the GPL. These assets undergo different terms as outlined as follows: any
-asset is accompanied by a .txt or a .settings file that specifies both the
-author(s) and the license of the asset in question. Those assets whose
-accompanying .txt or .settings file does not specify a license are licensed
-under the old SMC Contribution license, which is included as the file
-tsc/docs/pages/old_smc_contribution_license.md. Assets that are licensed as
-"special" have been granted to the TSC team under special licensing conditions
-that will not allow the asset to be used outside of the game.
+ .
+ Graphics, music, and any other artistic content in the game is not licensed
+ under the GPL. These assets undergo different terms as outlined as follows:
+ any asset is accompanied by a .txt or a .settings file that specifies both the
+ author(s) and the license of the asset in question. Those assets whose
+ accompanying .txt or .settings file does not specify a license are licensed
+ under the old SMC Contribution license, which is included as the file
+ tsc/docs/pages/old_smc_contribution_license.md. Assets that are licensed as
+ "special" have been granted to the TSC team under special licensing conditions
+ that will not allow the asset to be used outside of the game.
 
 The Debian packaging is © 2016, Muammar El Khatib <muammar@debian.org>
 and is licensed under the GPL Version 3, see `/usr/share/common-licenses/GPL-3'.
