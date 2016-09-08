@@ -26,6 +26,8 @@ override_dh_auto_build:
 override_dh_install:
 	dh_install
 	po4a -v -f debian/po4a.cfg
+	install -D -m 0644 debian/tsc.override \
+	    $(CURDIR)/debian/tsc/usr/share/lintian/overrides/tsc
 	cp -f debian/tsc.xpm debian/tsc/usr/share/pixmaps/tsc
 	ln -s tsc/tsc.xpm debian/tsc/usr/share/pixmaps/tsc.xpm
 	cp -f debian/tsc.desktop debian/tsc/usr/share/applications
