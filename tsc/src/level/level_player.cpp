@@ -9,7 +9,6 @@
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -46,6 +45,7 @@
 #include "../level/level_settings.hpp"
 #include "../core/editor/editor.hpp"
 #include "../level/level_editor.hpp"
+#include "../gui/hud.hpp"
 
 namespace TSC {
 
@@ -183,7 +183,7 @@ bool cLevel_Player::Set_On_Ground(cSprite* obj, bool set_on_top /* = 1 */)
         }
 
         // if massive ground and ducking key is pressed
-        if (m_ground_object->m_massive_type == MASS_MASSIVE && sf::Keyboard::isKeyPressed(pPreferences->m_key_down)) {
+        if (m_ground_object->m_massive_type == MASS_MASSIVE && (sf::Keyboard::isKeyPressed(pPreferences->m_key_down) || pJoystick->Down())) {
             Start_Ducking();
         }
     }
@@ -230,7 +230,7 @@ void cLevel_Player::DownGrade_Player(bool delayed /* = true */, bool force /* = 
         m_invincible = speedfactor_fps * 2.5f;
         m_invincible_mod = 0.0f;
 
-        pHud_Itembox->Request_Item();
+        gp_hud->Request_Item();
 
         // Issue the Downgrade event
         Scripting::cDowngrade_Event evt(1, 2); // downgrades = 1, max. downgrades = 2
@@ -240,10 +240,10 @@ void cLevel_Player::DownGrade_Player(bool delayed /* = true */, bool force /* = 
     }
 
     Set_Type(ALEX_DEAD, 0, 0);
-    pHud_Time->Reset();
-    pHud_Points->Clear();
+    gp_hud->Reset_Elapsed_Time();
+    gp_hud->Reset_Points();
     Ball_Clear();
-    pHud_Lives->Add_Lives(-1);
+    gp_hud->Add_Lives(-1);
     pAudio->Fadeout_Music(1700);
 
     // lost a live
@@ -619,7 +619,7 @@ void cLevel_Player::Update_Walking(void)
     }
 
     // only if left or right is pressed
-    if (sf::Keyboard::isKeyPressed(pPreferences->m_key_left) || sf::Keyboard::isKeyPressed(pPreferences->m_key_right) || pJoystick->m_left || pJoystick->m_right) {
+    if (sf::Keyboard::isKeyPressed(pPreferences->m_key_left) || sf::Keyboard::isKeyPressed(pPreferences->m_key_right) || pJoystick->Left() || pJoystick->Right()) {
         float ground_mod = 1.0f;
 
         if (m_ground_object && m_ground_object->m_image) {
@@ -723,7 +723,7 @@ void cLevel_Player::Update_Staying(void)
     }
 
     // if left and right is not pressed
-    if (!sf::Keyboard::isKeyPressed(pPreferences->m_key_left) && !sf::Keyboard::isKeyPressed(pPreferences->m_key_right) && !pJoystick->m_left && !pJoystick->m_right) {
+    if (!sf::Keyboard::isKeyPressed(pPreferences->m_key_left) && !sf::Keyboard::isKeyPressed(pPreferences->m_key_right) && !pJoystick->Left() && !pJoystick->Right()) {
         // walking
         if (m_velx) {
             if (m_ground_object->m_image && m_ground_object->m_image->m_ground_type == GROUND_ICE) {
@@ -789,7 +789,7 @@ void cLevel_Player::Update_Flying(void)
         }
 
         // move down
-        if (sf::Keyboard::isKeyPressed(pPreferences->m_key_down) || pJoystick->m_down) {
+        if (sf::Keyboard::isKeyPressed(pPreferences->m_key_down) || pJoystick->Down()) {
             const float max_vel = 5.0f * Get_Vel_Modifier();
 
             if (m_vely < max_vel) {
@@ -797,7 +797,7 @@ void cLevel_Player::Update_Flying(void)
             }
         }
         // move up
-        else if (sf::Keyboard::isKeyPressed(pPreferences->m_key_up) || pJoystick->m_up) {
+        else if (sf::Keyboard::isKeyPressed(pPreferences->m_key_up) || pJoystick->Up()) {
             const float max_vel = -5.0f * Get_Vel_Modifier();
 
             if (m_vely > max_vel) {
@@ -816,7 +816,7 @@ void cLevel_Player::Update_Flying(void)
     // falling
     else {
         // move left
-        if ((sf::Keyboard::isKeyPressed(pPreferences->m_key_left) || pJoystick->m_left) && !m_ducked_counter) {
+        if ((sf::Keyboard::isKeyPressed(pPreferences->m_key_left) || pJoystick->Left()) && !m_ducked_counter) {
             if (!m_parachute) {
                 const float max_vel = -10.0f * Get_Vel_Modifier();
 
@@ -834,7 +834,7 @@ void cLevel_Player::Update_Flying(void)
             }
         }
         // move right
-        else if ((sf::Keyboard::isKeyPressed(pPreferences->m_key_right) || pJoystick->m_right) && !m_ducked_counter) {
+        else if ((sf::Keyboard::isKeyPressed(pPreferences->m_key_right) || pJoystick->Right()) && !m_ducked_counter) {
             if (!m_parachute) {
                 const float max_vel = 10.0f * Get_Vel_Modifier();
 
@@ -1074,17 +1074,17 @@ void cLevel_Player::Update_Climbing(void)
 
     if (Is_On_Climbable()) {
         // set velocity
-        if (sf::Keyboard::isKeyPressed(pPreferences->m_key_left) || pJoystick->m_left) {
+        if (sf::Keyboard::isKeyPressed(pPreferences->m_key_left) || pJoystick->Left()) {
             m_velx = -2.0f * Get_Vel_Modifier();
         }
-        else if (sf::Keyboard::isKeyPressed(pPreferences->m_key_right) || pJoystick->m_right) {
+        else if (sf::Keyboard::isKeyPressed(pPreferences->m_key_right) || pJoystick->Right()) {
             m_velx = 2.0f * Get_Vel_Modifier();
         }
 
-        if (sf::Keyboard::isKeyPressed(pPreferences->m_key_up) || pJoystick->m_up) {
+        if (sf::Keyboard::isKeyPressed(pPreferences->m_key_up) || pJoystick->Up()) {
             m_vely = -4.0f * Get_Vel_Modifier();
         }
-        else if (sf::Keyboard::isKeyPressed(pPreferences->m_key_down) || pJoystick->m_down) {
+        else if (sf::Keyboard::isKeyPressed(pPreferences->m_key_down) || pJoystick->Down()) {
             m_vely = 4.0f * Get_Vel_Modifier();
         }
 
@@ -1132,7 +1132,9 @@ bool cLevel_Player::Is_On_Climbable(float move_y /* = 0.0f */)
 
 void cLevel_Player::Start_Jump_Keytime(void)
 {
-    if (m_god_mode || m_state == STA_STAY || m_state == STA_WALK || m_state == STA_RUN || m_state == STA_FALL || m_state == STA_FLY || m_state == STA_JUMP || (m_state == STA_CLIMB && !sf::Keyboard::isKeyPressed(pPreferences->m_key_up))) {
+    if (m_god_mode || m_state == STA_STAY || m_state == STA_WALK || m_state == STA_RUN
+        || m_state == STA_FALL || m_state == STA_FLY || m_state == STA_JUMP || (m_state == STA_CLIMB &&
+        !sf::Keyboard::isKeyPressed(pPreferences->m_key_up) && !pJoystick->Up())) {
         m_up_key_time = speedfactor_fps / 4;
     }
 }
@@ -1176,7 +1178,7 @@ void cLevel_Player::Start_Jump(float deaccel /* = 0.08f */)
     bool jump_key = 0;
 
     // if jump key pressed
-    if (sf::Keyboard::isKeyPressed(pPreferences->m_key_jump) || (pPreferences->m_joy_analog_jump && pJoystick->m_up) || pJoystick->Button(pPreferences->m_joy_button_jump)) {
+    if (sf::Keyboard::isKeyPressed(pPreferences->m_key_jump) || (pPreferences->m_joy_analog_jump && pJoystick->Up()) || pJoystick->Button(pPreferences->m_joy_button_jump)) {
         jump_key = 1;
     }
 
@@ -1259,7 +1261,7 @@ void cLevel_Player::Update_Jump(void)
     }
 
     // jumping physics
-    if (sf::Keyboard::isKeyPressed(pPreferences->m_key_jump) || (pPreferences->m_joy_analog_jump && pJoystick->m_up) || pJoystick->Button(pPreferences->m_joy_button_jump)) {
+    if (sf::Keyboard::isKeyPressed(pPreferences->m_key_jump) || (pPreferences->m_joy_analog_jump && pJoystick->Up()) || pJoystick->Button(pPreferences->m_joy_button_jump)) {
         Add_Velocity_Y(-(m_jump_accel_up + (m_vely * m_jump_vel_deaccel) / Get_Vel_Modifier()));
         m_jump_power -= pFramerate->m_speed_factor;
     }
@@ -1269,7 +1271,7 @@ void cLevel_Player::Update_Jump(void)
     }
 
     // left right physics
-    if ((sf::Keyboard::isKeyPressed(pPreferences->m_key_left) || pJoystick->m_left) && !m_ducked_counter) {
+    if ((sf::Keyboard::isKeyPressed(pPreferences->m_key_left) || pJoystick->Left()) && !m_ducked_counter) {
         const float max_vel = -10.0f * Get_Vel_Modifier();
 
         if (m_velx > max_vel) {
@@ -1277,7 +1279,7 @@ void cLevel_Player::Update_Jump(void)
         }
 
     }
-    else if ((sf::Keyboard::isKeyPressed(pPreferences->m_key_right) || pJoystick->m_right) && !m_ducked_counter) {
+    else if ((sf::Keyboard::isKeyPressed(pPreferences->m_key_right) || pJoystick->Right()) && !m_ducked_counter) {
         const float max_vel = 10.0f * Get_Vel_Modifier();
 
         if (m_velx < max_vel) {
@@ -1847,9 +1849,8 @@ void cLevel_Player::Reset_Save(void)
     m_goldpieces = 0;
     m_points = 0;
 
-    pHud_Time->Reset();
-    pHud_Manager->Update_Text();
-    pHud_Itembox->Reset();
+    gp_hud->Reset_Elapsed_Time();
+    gp_hud->Reset_Item();
 }
 
 void cLevel_Player::Reset(bool full /* = 1 */)
@@ -1886,7 +1887,7 @@ void cLevel_Player::Reset(bool full /* = 1 */)
         m_invincible_mod = 0.0f;
         m_invincible_star = 0.0f;
         Set_Color_Combine(0.0f, 0.0f, 0.0f, 0);
-        pHud_Itembox->Push_back();
+        gp_hud->Reset_Item();
     }
 }
 
@@ -2712,19 +2713,19 @@ void cLevel_Player::Get_Item(SpriteType item_type, bool force /* = 0 */, cMoving
             // move item to itembox
             else if (current_alex_type == ALEX_BIG) {
                 // item to itembox
-                pHud_Itembox->Set_Item(TYPE_MUSHROOM_DEFAULT);
+                gp_hud->Set_Item(TYPE_MUSHROOM_DEFAULT);
             }
             // change to big
             else if (current_alex_type == ALEX_FIRE) {
                 // set type
                 Set_Type(ALEX_BIG, 0, 1, use_temp_power);
                 // old item to itembox
-                pHud_Itembox->Set_Item(TYPE_FIREPLANT);
+                gp_hud->Set_Item(TYPE_FIREPLANT);
             }
         }
         // move item to itembox
         else {
-            pHud_Itembox->Set_Item(TYPE_MUSHROOM_DEFAULT);
+            gp_hud->Set_Item(TYPE_MUSHROOM_DEFAULT);
         }
     }
     // Fireplant
@@ -2734,7 +2735,7 @@ void cLevel_Player::Get_Item(SpriteType item_type, bool force /* = 0 */, cMoving
             // move item to itembox
             if (current_alex_type == ALEX_FIRE) {
                 // move item to itembox
-                pHud_Itembox->Set_Item(TYPE_FIREPLANT);
+                gp_hud->Set_Item(TYPE_FIREPLANT);
             }
             // change to fire
             else {
@@ -2743,7 +2744,7 @@ void cLevel_Player::Get_Item(SpriteType item_type, bool force /* = 0 */, cMoving
             }
         }
         // fire explosion
-        else if (current_alex_type == ALEX_FIRE && pHud_Itembox->m_item_id == TYPE_FIREPLANT) {
+        else if (current_alex_type == ALEX_FIRE && gp_hud->Get_Item() == TYPE_FIREPLANT) {
             unsigned int ball_amount = 10;
 
             // if star add another ball
@@ -2752,11 +2753,11 @@ void cLevel_Player::Get_Item(SpriteType item_type, bool force /* = 0 */, cMoving
             }
 
             Ball_Add(FIREBALL_EXPLOSION, 180, ball_amount);
-            pHud_Points->Add_Points(1000, m_pos_x + (m_col_rect.m_w / 2), m_pos_y + 2);
+            gp_hud->Add_Points(1000, m_pos_x + (m_col_rect.m_w / 2), m_pos_y + 2);
         }
         // move item to itembox
         else {
-            pHud_Itembox->Set_Item(TYPE_FIREPLANT);
+            gp_hud->Set_Item(TYPE_FIREPLANT);
         }
     }
     // Blue Mushroom
@@ -2766,7 +2767,7 @@ void cLevel_Player::Get_Item(SpriteType item_type, bool force /* = 0 */, cMoving
             // move item to itembox
             if (current_alex_type == ALEX_ICE) {
                 // move item to itembox
-                pHud_Itembox->Set_Item(TYPE_MUSHROOM_BLUE);
+                gp_hud->Set_Item(TYPE_MUSHROOM_BLUE);
             }
             // change to ice
             else {
@@ -2775,7 +2776,7 @@ void cLevel_Player::Get_Item(SpriteType item_type, bool force /* = 0 */, cMoving
             }
         }
         // ice explosion
-        else if (current_alex_type == ALEX_ICE && pHud_Itembox->m_item_id == TYPE_MUSHROOM_BLUE) {
+        else if (current_alex_type == ALEX_ICE && gp_hud->Get_Item() == TYPE_MUSHROOM_BLUE) {
             unsigned int ball_amount = 10;
 
             // if star add another ball
@@ -2784,11 +2785,11 @@ void cLevel_Player::Get_Item(SpriteType item_type, bool force /* = 0 */, cMoving
             }
 
             Ball_Add(ICEBALL_EXPLOSION, 180, ball_amount);
-            pHud_Points->Add_Points(1000, m_pos_x + (m_col_rect.m_w / 2), m_pos_y + 2);
+            gp_hud->Add_Points(1000, m_pos_x + (m_col_rect.m_w / 2), m_pos_y + 2);
         }
         // move item to itembox
         else {
-            pHud_Itembox->Set_Item(TYPE_MUSHROOM_BLUE);
+            gp_hud->Set_Item(TYPE_MUSHROOM_BLUE);
         }
     }
     // Ghost Mushroom
@@ -2808,13 +2809,13 @@ void cLevel_Player::Get_Item(SpriteType item_type, bool force /* = 0 */, cMoving
         }
         // move item to itembox
         else {
-            pHud_Itembox->Set_Item(TYPE_MUSHROOM_GHOST);
+            gp_hud->Set_Item(TYPE_MUSHROOM_GHOST);
         }
     }
     // Mushroom 1-UP
     else if (item_type == TYPE_MUSHROOM_LIVE_1) {
         pAudio->Play_Sound("item/live_up.ogg", RID_1UP_MUSHROOM);
-        pHud_Lives->Add_Lives(1);
+        gp_hud->Add_Lives(1);
     }
     // Mushroom Poison
     else if (item_type == TYPE_MUSHROOM_POISON) {
@@ -2823,14 +2824,14 @@ void cLevel_Player::Get_Item(SpriteType item_type, bool force /* = 0 */, cMoving
     // Moon
     else if (item_type == TYPE_MOON) {
         pAudio->Play_Sound("item/moon.ogg", RID_MOON);
-        pHud_Lives->Add_Lives(3);
+        gp_hud->Add_Lives(3);
     }
     // Star
     else if (item_type == TYPE_STAR) {
         // todo : check if music is already playing
         pAudio->Play_Music("game/star.ogg", false, 1, 500);
         pAudio->Play_Music(pActive_Level->m_musicfile, true, 0);
-        pHud_Points->Add_Points(1000, m_pos_x + (m_col_rect.m_w / 2), m_pos_y + 2);
+        gp_hud->Add_Points(1000, m_pos_x + (m_col_rect.m_w / 2), m_pos_y + 2);
         m_invincible = speedfactor_fps * 16.0f;
         m_invincible_star = speedfactor_fps * 15.0f;
     }
@@ -3114,7 +3115,7 @@ void cLevel_Player::Action_Interact(input_identifier key_type)
     }
     // Request Item
     else if (key_type == INP_ITEM) {
-        pHud_Itembox->Request_Item();
+        gp_hud->Request_Item();
     }
     // Exit
     else if (key_type == INP_EXIT) {
@@ -3178,7 +3179,7 @@ void cLevel_Player::Action_Stop_Interact(input_identifier key_type)
     // Left
     else if (key_type == INP_LEFT) {
         // if key in opposite direction is still pressed only change direction
-        if (sf::Keyboard::isKeyPressed(pPreferences->m_key_right) || pJoystick->m_right) {
+        if (sf::Keyboard::isKeyPressed(pPreferences->m_key_right) || pJoystick->Right()) {
             m_direction = DIR_RIGHT;
         }
         else {
@@ -3188,7 +3189,7 @@ void cLevel_Player::Action_Stop_Interact(input_identifier key_type)
     // Right
     else if (key_type == INP_RIGHT) {
         // if key in opposite direction is still pressed only change direction
-        if (sf::Keyboard::isKeyPressed(pPreferences->m_key_left) || pJoystick->m_left) {
+        if (sf::Keyboard::isKeyPressed(pPreferences->m_key_left) || pJoystick->Left()) {
             m_direction = DIR_LEFT;
         }
         else {
@@ -3369,7 +3370,7 @@ void cLevel_Player::Add_Kill_Multiplier(void)
         // only every fifth kill
         if (static_cast<int>(m_kill_multiplier * 10) % 5 == 0) {
             // add 1 live
-            pHud_Goldpieces->Add_Gold(100);
+            gp_hud->Add_Jewels(100);
         }
     }
 
@@ -3516,7 +3517,7 @@ Col_Valid_Type cLevel_Player::Validate_Collision(cSprite* obj)
     }
     else if (obj->m_massive_type == MASS_HALFMASSIVE) {
         // fall through
-        if (sf::Keyboard::isKeyPressed(pPreferences->m_key_down)) {
+        if (sf::Keyboard::isKeyPressed(pPreferences->m_key_down) || pJoystick->Down()) {
             return COL_VTYPE_NOT_VALID;
         }
 
@@ -3564,22 +3565,22 @@ Col_Valid_Type cLevel_Player::Validate_Collision(cSprite* obj)
             // warp levelexit key check
             if (levelexit->m_exit_type == LEVEL_EXIT_WARP) {
                 // joystick events are sent as keyboard keys
-                if (sf::Keyboard::isKeyPressed(pPreferences->m_key_up)) {
+                if (sf::Keyboard::isKeyPressed(pPreferences->m_key_up) || pJoystick->Up()) {
                     if (levelexit->m_start_direction == DIR_UP) {
                         Action_Interact(INP_UP);
                     }
                 }
-                else if (sf::Keyboard::isKeyPressed(pPreferences->m_key_down)) {
+                else if (sf::Keyboard::isKeyPressed(pPreferences->m_key_down) || pJoystick->Down()) {
                     if (levelexit->m_start_direction == DIR_DOWN) {
                         Action_Interact(INP_DOWN);
                     }
                 }
-                else if (sf::Keyboard::isKeyPressed(pPreferences->m_key_right)) {
+                else if (sf::Keyboard::isKeyPressed(pPreferences->m_key_right) || pJoystick->Right()) {
                     if (levelexit->m_start_direction == DIR_RIGHT) {
                         Action_Interact(INP_RIGHT);
                     }
                 }
-                else if (sf::Keyboard::isKeyPressed(pPreferences->m_key_left)) {
+                else if (sf::Keyboard::isKeyPressed(pPreferences->m_key_left) || pJoystick->Left()) {
                     if (levelexit->m_start_direction == DIR_LEFT) {
                         Action_Interact(INP_LEFT);
                     }
@@ -3644,7 +3645,7 @@ void cLevel_Player::Handle_Collision_Enemy(cObjectCollision* collision)
         // hit
         if (hit_enemy) {
             pAudio->Play_Sound("item/star_kill.ogg");
-            pHud_Points->Add_Points(static_cast<unsigned int>(enemy->m_kill_points * 1.2f), enemy->m_pos_x, enemy->m_pos_y - 5.0f, "", yellow, 1);
+            gp_hud->Add_Points(static_cast<unsigned int>(enemy->m_kill_points * 1.2f), enemy->m_pos_x, enemy->m_pos_y - 5.0f, "", yellow, 1);
             // force complete downgrade
             enemy->DownGrade(1);
             Add_Kill_Multiplier();
@@ -3695,7 +3696,7 @@ void cLevel_Player::Handle_Collision_Enemy(cObjectCollision* collision)
         pAudio->Play_Sound("item/ice_kill.wav");
 
         // get points
-        pHud_Points->Add_Points(enemy->m_kill_points, enemy->m_pos_x, enemy->m_pos_y - 10.0f, "", static_cast<uint8_t>(255), 1);
+        gp_hud->Add_Points(enemy->m_kill_points, enemy->m_pos_x, enemy->m_pos_y - 10.0f, "", static_cast<uint8_t>(255), 1);
 
         // kill enemy
         enemy->DownGrade(1);
@@ -3747,7 +3748,7 @@ void cLevel_Player::Handle_Collision_Massive(cObjectCollision* collision)
     // climbable
     if (col_obj->m_massive_type == MASS_CLIMBABLE && m_state != STA_CLIMB && m_state != STA_FLY) {
         // if not climbing and player wants to climb
-        if (sf::Keyboard::isKeyPressed(pPreferences->m_key_up) || pJoystick->m_up || ((sf::Keyboard::isKeyPressed(pPreferences->m_key_down) || pJoystick->m_down) && !m_ground_object)) {
+        if (sf::Keyboard::isKeyPressed(pPreferences->m_key_up) || pJoystick->Up() || ((sf::Keyboard::isKeyPressed(pPreferences->m_key_down) || pJoystick->Down()) && !m_ground_object)) {
             // start climbing
             Start_Climbing();
         }

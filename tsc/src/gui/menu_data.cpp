@@ -121,9 +121,6 @@ void cMenu_Base::Update(void)
         // animation
         pMenuCore->m_animation_manager->Update();
     }
-
-    // hud
-    pHud_Manager->Update();
 }
 
 void cMenu_Base::Draw(void)
@@ -165,8 +162,6 @@ void cMenu_Base::Draw(void)
 
 void cMenu_Base::Draw_End(void)
 {
-    // hud
-    pHud_Manager->Draw();
 }
 
 void cMenu_Base::Set_Exit_To_Game_Mode(GameMode gamemode)
@@ -869,7 +864,7 @@ void cMenu_Start::Load_Campaign(std::string name)
 
     // if not available
     if (!new_campaign) {
-        pHud_Debug->Set_Text(_("Couldn't load campaign ") + name, static_cast<float>(speedfactor_fps));
+        gp_hud->Set_Text(_("Couldn't load campaign ") + name);
     }
     else {
         // enter level
@@ -904,7 +899,7 @@ void cMenu_Start::Load_World(std::string name)
 
     // if not available
     if (!new_world) {
-        pHud_Debug->Set_Text(_("Couldn't load overworld ") + name, static_cast<float>(speedfactor_fps));
+        gp_hud->Set_Text(_("Couldn't load overworld ") + name);
     }
     else {
         // enter world
@@ -930,7 +925,7 @@ bool cMenu_Start::Load_Level(std::string level_name)
     boost::filesystem::path level_path = pLevel_Manager->Get_Path(level_name);
     if (level_path.empty()) {
         pAudio->Play_Sound("error.ogg");
-        pHud_Debug->Set_Text(_("Couldn't load level ") + level_name, static_cast<float>(speedfactor_fps));
+        gp_hud->Set_Text(_("Couldn't load level ") + level_name);
         return 0;
     }
 
@@ -1987,21 +1982,37 @@ void cMenu_Options::Init_GUI_Joystick(void)
 
     combo_joy_analog_jump->subscribeEvent(CEGUI::Combobox::EventListSelectionAccepted, CEGUI::Event::Subscriber(&cMenu_Options::Joystick_Analog_Jump_Select, this));
 
-    // Joystick axis horizontal
+    // First horizontal joystick axis
     CEGUI::Window* text_joystick_axis_hor = p_root->getChild("options/window_options/tabcontrol_main/tab_joystick/joystick_text_axis_hor");
     text_joystick_axis_hor->setText(UTF8_("Axis Hor"));
 
     CEGUI::Spinner* spinner_joystick_axis_hor = static_cast<CEGUI::Spinner*>(p_root->getChild("options/window_options/tabcontrol_main/tab_joystick/joystick_spinner_axis_hor"));
-    spinner_joystick_axis_hor->setCurrentValue(static_cast<float>(pPreferences->m_joy_axis_hor));
+    spinner_joystick_axis_hor->setCurrentValue(static_cast<float>(pPreferences->m_joy_axis_hor[0]));
     spinner_joystick_axis_hor->subscribeEvent(CEGUI::Spinner::EventValueChanged, CEGUI::Event::Subscriber(&cMenu_Options::Joystick_Spinner_Axis_Hor_Changed, this));
 
-    // Joystick axis vertical
+    // First vertical joystick axis
     CEGUI::Window* text_joystick_axis_ver = p_root->getChild("options/window_options/tabcontrol_main/tab_joystick/joystick_text_axis_ver");
     text_joystick_axis_ver->setText(UTF8_("Ver"));
 
     CEGUI::Spinner* spinner_joystick_axis_ver = static_cast<CEGUI::Spinner*>(p_root->getChild("options/window_options/tabcontrol_main/tab_joystick/joystick_spinner_axis_ver"));
-    spinner_joystick_axis_ver->setCurrentValue(static_cast<float>(pPreferences->m_joy_axis_ver));
+    spinner_joystick_axis_ver->setCurrentValue(static_cast<float>(pPreferences->m_joy_axis_ver[0]));
     spinner_joystick_axis_ver->subscribeEvent(CEGUI::Spinner::EventValueChanged, CEGUI::Event::Subscriber(&cMenu_Options::Joystick_Spinner_Axis_Ver_Changed, this));
+
+    // Second horizontal joystick axis
+    CEGUI::Window* text_joystick_axis_hor2 = p_root->getChild("options/window_options/tabcontrol_main/tab_joystick/joystick_text_axis_hor2");
+    text_joystick_axis_hor2->setText(UTF8_("Axis Hor2"));
+
+    CEGUI::Spinner* spinner_joystick_axis_hor2 = static_cast<CEGUI::Spinner*>(p_root->getChild("options/window_options/tabcontrol_main/tab_joystick/joystick_spinner_axis_hor2"));
+    spinner_joystick_axis_hor2->setCurrentValue(static_cast<float>(pPreferences->m_joy_axis_hor[1]));
+    spinner_joystick_axis_hor2->subscribeEvent(CEGUI::Spinner::EventValueChanged, CEGUI::Event::Subscriber(&cMenu_Options::Joystick_Spinner_Axis_Hor2_Changed, this));
+
+    // Second vertical joystick axis
+    CEGUI::Window* text_joystick_axis_ver2 = p_root->getChild("options/window_options/tabcontrol_main/tab_joystick/joystick_text_axis_ver2");
+    text_joystick_axis_ver2->setText(UTF8_("Ver2"));
+
+    CEGUI::Spinner* spinner_joystick_axis_ver2 = static_cast<CEGUI::Spinner*>(p_root->getChild("options/window_options/tabcontrol_main/tab_joystick/joystick_spinner_axis_ver2"));
+    spinner_joystick_axis_ver2->setCurrentValue(static_cast<float>(pPreferences->m_joy_axis_ver[1]));
+    spinner_joystick_axis_ver2->subscribeEvent(CEGUI::Spinner::EventValueChanged, CEGUI::Event::Subscriber(&cMenu_Options::Joystick_Spinner_Axis_Ver2_Changed, this));
 
     // Joystick shortcut listbox
     CEGUI::Window* text_joystick_shortcuts = p_root->getChild("options/window_options/tabcontrol_main/tab_joystick/joystick_text_shortcuts");
@@ -3022,7 +3033,7 @@ bool cMenu_Options::Joystick_Spinner_Axis_Hor_Changed(const CEGUI::EventArgs& ev
 {
     const CEGUI::WindowEventArgs& windowEventArgs = static_cast<const CEGUI::WindowEventArgs&>(event);
     // set new value
-    pPreferences->m_joy_axis_hor = static_cast<sf::Joystick::Axis>(static_cast<CEGUI::Spinner*>(windowEventArgs.window)->getCurrentValue());
+    pPreferences->m_joy_axis_hor[0] = static_cast<sf::Joystick::Axis>(static_cast<CEGUI::Spinner*>(windowEventArgs.window)->getCurrentValue());
 
     return 1;
 }
@@ -3031,7 +3042,25 @@ bool cMenu_Options::Joystick_Spinner_Axis_Ver_Changed(const CEGUI::EventArgs& ev
 {
     const CEGUI::WindowEventArgs& windowEventArgs = static_cast<const CEGUI::WindowEventArgs&>(event);
     // set new value
-    pPreferences->m_joy_axis_ver = static_cast<sf::Joystick::Axis>(static_cast<CEGUI::Spinner*>(windowEventArgs.window)->getCurrentValue());
+    pPreferences->m_joy_axis_ver[0] = static_cast<sf::Joystick::Axis>(static_cast<CEGUI::Spinner*>(windowEventArgs.window)->getCurrentValue());
+
+    return 1;
+}
+
+bool cMenu_Options::Joystick_Spinner_Axis_Hor2_Changed(const CEGUI::EventArgs& event)
+{
+    const CEGUI::WindowEventArgs& windowEventArgs = static_cast<const CEGUI::WindowEventArgs&>(event);
+    // set new value
+    pPreferences->m_joy_axis_hor[1] = static_cast<sf::Joystick::Axis>(static_cast<CEGUI::Spinner*>(windowEventArgs.window)->getCurrentValue());
+
+    return 1;
+}
+
+bool cMenu_Options::Joystick_Spinner_Axis_Ver2_Changed(const CEGUI::EventArgs& event)
+{
+    const CEGUI::WindowEventArgs& windowEventArgs = static_cast<const CEGUI::WindowEventArgs&>(event);
+    // set new value
+    pPreferences->m_joy_axis_ver[1] = static_cast<sf::Joystick::Axis>(static_cast<CEGUI::Spinner*>(windowEventArgs.window)->getCurrentValue());
 
     return 1;
 }
@@ -3343,7 +3372,7 @@ void cMenu_Savegames::Update_Save(void)
     // no costs in debug builds
 #ifndef _DEBUG
     if (pActive_Level->Is_Loaded()) {
-        pHud_Points->Set_Points(pLevel_Player->m_points - 3000);
+        gp_hud->Set_Points(pLevel_Player->m_points - 3000);
     }
 #endif
     // save

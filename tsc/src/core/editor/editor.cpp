@@ -137,7 +137,7 @@ void cEditor::Enable(cSprite_Manager* p_edited_sprite_manager)
     Draw_Static_Text(_("Loading"), &orange, NULL, 0);
 
     pAudio->Play_Sound("editor/enter.ogg");
-    pHud_Debug->Set_Text(_("Editor enabled"));
+    gp_hud->Set_Text(_("Editor enabled"));
     pMouseCursor->Set_Active(true);
 
     pActive_Animation_Manager->Delete_All(); // Stop all animations
@@ -1275,7 +1275,7 @@ void cEditor::Process_Input(void)
     }
 
     // Camera Movement
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) || pJoystick->m_right) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) || pJoystick->Right()) {
         if (pKeyboard->Is_Shift_Down()) {
             pActive_Camera->Move(CAMERA_SPEED * pFramerate->m_speed_factor * 3 * pPreferences->m_scroll_speed, 0.0f);
         }
@@ -1283,7 +1283,7 @@ void cEditor::Process_Input(void)
             pActive_Camera->Move(CAMERA_SPEED * pFramerate->m_speed_factor * pPreferences->m_scroll_speed, 0.0f);
         }
     }
-    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) || pJoystick->m_left) {
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) || pJoystick->Left()) {
         if (pKeyboard->Is_Shift_Down()) {
             pActive_Camera->Move(-(CAMERA_SPEED * pFramerate->m_speed_factor * 3 * pPreferences->m_scroll_speed), 0.0f);
         }
@@ -1291,7 +1291,7 @@ void cEditor::Process_Input(void)
             pActive_Camera->Move(-(CAMERA_SPEED * pFramerate->m_speed_factor * pPreferences->m_scroll_speed), 0.0f);
         }
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) || pJoystick->m_up) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) || pJoystick->Up()) {
         if (pKeyboard->Is_Shift_Down()) {
             pActive_Camera->Move(0.0f, -(CAMERA_SPEED * pFramerate->m_speed_factor * 3 * pPreferences->m_scroll_speed));
         }
@@ -1299,7 +1299,7 @@ void cEditor::Process_Input(void)
             pActive_Camera->Move(0.0f, -(CAMERA_SPEED * pFramerate->m_speed_factor * pPreferences->m_scroll_speed));
         }
     }
-    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || pJoystick->m_down) {
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || pJoystick->Down()) {
         if (pKeyboard->Is_Shift_Down()) {
             pActive_Camera->Move(0.0f, CAMERA_SPEED * pFramerate->m_speed_factor * 3 * pPreferences->m_scroll_speed);
         }
