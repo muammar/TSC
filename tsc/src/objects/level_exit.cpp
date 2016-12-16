@@ -22,7 +22,6 @@
 #include "../core/framerate.hpp"
 #include "../core/main.hpp"
 #include "../video/gl_surface.hpp"
-#include "../video/font.hpp"
 #include "../video/renderer.hpp"
 #include "../level/level.hpp"
 #include "../core/i18n.hpp"
@@ -229,17 +228,6 @@ void cLevel_Exit::Draw(cSurface_Request* request /* = NULL */)
 
     // draw color rect
     pVideo->Draw_Rect(m_col_rect.m_x - pActive_Camera->m_x, m_col_rect.m_y - pActive_Camera->m_y, m_col_rect.m_w, m_col_rect.m_h, m_editor_pos_z, &m_editor_color);
-
-    // draw destination entry name
-    if (!m_dest_entry.empty()) {
-        pFont->Prepare_SFML_Text(m_dest_entry_text,
-                                 m_dest_entry,
-                                 m_col_rect.m_x + m_col_rect.m_w + 5 - pActive_Camera->m_x,
-                                 m_col_rect.m_y - pActive_Camera->m_y,
-                                 cFont_Manager::FONTSIZE_SMALL,
-                                 white);
-        pFont->Queue_Text(m_dest_entry_text);
-    }
 }
 
 void cLevel_Exit::Activate(void)
@@ -383,21 +371,35 @@ void cLevel_Exit::Set_Camera_Motion(Camera_movement camera_motion)
     m_exit_motion = camera_motion;
 }
 
+/**
+ * Reset the level's editor color according to its current properties.
+ */
+void cLevel_Exit::Refresh_Color(void)
+{
+    if (m_dest_level.empty() && m_dest_entry.empty()) // Level finish
+        m_editor_color = yellow;
+    else if (!m_dest_level.empty() && !m_dest_entry.empty()) // Entry in sublevel
+        m_editor_color = lila;
+    else if (m_dest_level.empty() && !m_dest_entry.empty()) // Entry in current level
+        m_editor_color = red;
+    else if (!m_dest_level.empty() && m_dest_entry.empty()) // Default start pos in sublevel
+        m_editor_color = lila;
+    else // Not possible
+        std::cerr << "Warning: Ignoring invalid level exit state in color determination" << std::endl;
+
+    m_editor_color.alpha = 128;
+}
+
 void cLevel_Exit::Set_Level(std::string filename)
 {
     if (filename.empty() && m_dest_entry.empty()) {
         m_dest_level.clear();
-        // red for no destination level
-        m_editor_color = red;
-        m_editor_color.alpha = 128;
+        Refresh_Color();
         return;
     }
 
-    // lila for set destination level
-    m_editor_color = lila;
-    m_editor_color.alpha = 128;
-
     m_dest_level = filename;
+    Refresh_Color();
 }
 
 std::string cLevel_Exit::Get_Level() const
@@ -415,10 +417,7 @@ void cLevel_Exit::Set_Entry(const std::string& entry_name)
     // Set new name
     m_dest_entry = entry_name;
 
-    // if empty don't create the editor image
-    if (m_dest_entry.empty()) {
-        return;
-    }
+    Refresh_Color();
 }
 
 void cLevel_Exit::Set_Return_Level(const std::string& level)

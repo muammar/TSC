@@ -282,8 +282,6 @@ void cPreferencesLoader::handle_property(const std::string& name, const std::str
         mp_preferences->m_joy_enabled = string_to_bool(value);
     else if (name == "joy_name")
         mp_preferences->m_joy_name = value;
-    else if (name == "joy_analog_jump")
-        mp_preferences->m_joy_analog_jump = string_to_bool(value);
     else if (name == "joy_axis_hor") {
         val = string_to_int(value);
         if (val >= 0 && val <= 256)
@@ -305,9 +303,9 @@ void cPreferencesLoader::handle_property(const std::string& name, const std::str
             mp_preferences->m_joy_axis_ver[1] = static_cast<sf::Joystick::Axis>(val);
     }
     else if (name == "joy_axis_threshold") {
-        val = string_to_int(value);
-        if (val >= 0 && val <= 100)
-            mp_preferences->m_joy_axis_threshold = val;
+        float floatVal = string_to_float(value);
+        if (floatVal >= 0 && floatVal <= 100)
+            mp_preferences->m_joy_axis_threshold = floatVal;
     }
     else if (name == "joy_button_jump") {
         val = string_to_int(value);

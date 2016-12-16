@@ -92,6 +92,9 @@ namespace TSC {
         virtual void Update(void);
         virtual void Draw(void);
     private:
+        void credits_item_clicked(const CEGUI::EventArgs& event);
+        void credits_item_entered(const CEGUI::EventArgs& event);
+
         cHudSprite* mp_start_active;
         cHudSprite* mp_start_inactive;
         cHudSprite* mp_options_active;
@@ -106,7 +109,7 @@ namespace TSC {
         cHudSprite* mp_current_inactive_item;
         cHudSprite* mp_current_active_item;
 
-        sf::Text m_credits_item;
+        CEGUI::Window* mp_credits_item;
 
         int m_start_index;
         int m_options_index;
@@ -170,10 +173,6 @@ namespace TSC {
         bool TabControl_Selection_Changed(const CEGUI::EventArgs& event);
         // key down event
         bool TabControl_Keydown(const CEGUI::EventArgs& event);
-        // listbox level/world key down event
-        bool Listbox_Keydown(const CEGUI::EventArgs& event);
-        // listbox level/world character key event
-        bool Listbox_Character_Key(const CEGUI::EventArgs& event);
 
         // package selected event
         bool Package_Select(const CEGUI::EventArgs& event);
@@ -205,11 +204,6 @@ namespace TSC {
         bool Button_Enter_Clicked(const CEGUI::EventArgs& event);
         // back button event
         bool Button_Back_Clicked(const CEGUI::EventArgs& event);
-
-        // buffer if user types characters in the listbox
-        CEGUI::String m_listbox_search_buffer;
-        // counter until buffer is cleared
-        float m_listbox_search_buffer_counter;
     };
 
     /* *** *** *** *** *** *** *** cMenu_Options *** *** *** *** *** *** *** *** *** *** */
@@ -290,7 +284,6 @@ namespace TSC {
         bool Joystick_Name_Click(const CEGUI::EventArgs& event);
         bool Joystick_Name_Select(const CEGUI::EventArgs& event);
         bool Joystick_Sensitivity_Changed(const CEGUI::EventArgs& event);
-        bool Joystick_Analog_Jump_Select(const CEGUI::EventArgs& event);
         bool Joystick_Spinner_Axis_Hor_Changed(const CEGUI::EventArgs& event);
         bool Joystick_Spinner_Axis_Ver_Changed(const CEGUI::EventArgs& event);
         bool Joystick_Spinner_Axis_Hor2_Changed(const CEGUI::EventArgs& event);
@@ -370,12 +363,6 @@ namespace TSC {
         virtual void Init(void);
         virtual void Init_GUI(void);
         virtual void Exit(void);
-        virtual void Selected_Item_Changed(int new_active_item);
-        virtual void Update(void);
-        virtual void Draw(void);
-
-        void Update_Load(void);
-        void Update_Save(void);
 
         // Set Savegame Description
         std::string Set_Save_Description(unsigned int save_slot);
@@ -385,11 +372,10 @@ namespace TSC {
         // if save menu
         bool m_type_save;
     private:
-        sf::Text m_slot_texts[NUM_SAVEGAME_SLOTS];
-        sf::Text m_back_text;
-        sf::Text* mp_current_item;
-        int m_back_item_index; //< Index of the back menu entry in the menu handler
-        bool m_scaling_up;
+        bool Button_Back_Clicked(const CEGUI::EventArgs& event);
+        bool Button_Save_Clicked(const CEGUI::EventArgs& event);
+        bool Button_Load_Clicked(const CEGUI::EventArgs& event);
+        bool TabControl_Keydown(const CEGUI::EventArgs& event);
     };
 
     /* *** *** *** *** *** *** *** cMenu_Credits *** *** *** *** *** *** *** *** *** *** */
@@ -419,10 +405,21 @@ namespace TSC {
         void Menu_Fade(bool fade_in = 1);
     private:
         cHudSprite* mp_tsc_logo;
-        std::vector<sf::Text> m_credit_lines;
-        sf::Text m_back_text;
-        int m_back_index;
+        std::vector<CEGUI::Window*> m_credit_lines;
     };
+
+    // listbox level/world key down event
+    bool Listbox_Keydown(const CEGUI::EventArgs& event);
+    // listbox level/world character key event
+    bool Listbox_Character_Key(const CEGUI::EventArgs& event);
+    // Update search buffer handling; call this once a frame in your menu that
+    // uses a CEGUI::Listbox if you want search facility.
+    void Listbox_Searchbuffer_Update();
+
+    // buffer if user types characters in the listbox
+    extern CEGUI::String listbox_search_buffer;
+    // counter until buffer is cleared
+    extern float listbox_search_buffer_counter;
 
     /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 

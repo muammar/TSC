@@ -115,8 +115,6 @@ cAudio::cAudio(void)
 
     m_sound_volume = cPreferences::m_sound_volume_default;
     m_music_volume = cPreferences::m_music_volume_default;
-
-    m_max_sounds = 100; // XXX: what???
 }
 
 cAudio::~cAudio(void)
@@ -141,7 +139,7 @@ bool cAudio::Init(void)
         return 1;
     }
 
-    Close();
+    Close(!sound, !music);
 
     // if no audio
     if (!music && !sound) {
@@ -151,44 +149,42 @@ bool cAudio::Init(void)
     m_initialised = 1;
 
     // music initialization
-    if (music && !m_music_enabled) {
+    if (music) {
         m_music_enabled = 1;
 
         // set music volume
         Set_Music_Volume(m_music_volume);
     }
     // music de-initialization
-    else if (!music && m_music_enabled) {
-        Halt_Music();
-
+    else {
         m_music_enabled = 0;
     }
 
     // sound initialization
-    if (sound && !m_sound_enabled) {
+    if (sound) {
         m_sound_enabled = 1;
 
         // set sound volume
         Set_Sound_Volume(m_sound_volume);
     }
     // sound de-initialization
-    else if (!sound && m_sound_enabled) {
-        Stop_Sounds();
-
+    else {
         m_sound_enabled = 0;
     }
+
+    m_max_sounds = 100; // XXX: what???
 
     return 1;
 }
 
-void cAudio::Close(void)
+void cAudio::Close(bool close_sound/*=true*/, bool close_music/*=true*/)
 {
     if (m_initialised) {
         if (m_debug) {
             cout << "Closing Audio System" << endl;
         }
 
-        if (m_sound_enabled) {
+        if (m_sound_enabled && close_sound) {
             Stop_Sounds();
 
             // clear sounds
@@ -202,7 +198,7 @@ void cAudio::Close(void)
             m_sound_enabled = 0;
         }
 
-        if (m_music_enabled) {
+        if (m_music_enabled && close_music) {
             Halt_Music();
 
             m_music_enabled = 0;
@@ -407,6 +403,8 @@ cAudio_Sound* cAudio::Get_Playing_Sound(fs::path filename)
 
 cAudio_Sound* cAudio::Create_Sound_Channel(void)
 {
+    assert(m_max_sounds > 0);
+
     // get all sounds
     for (AudioSoundList::iterator itr = m_active_sounds.begin(); itr != m_active_sounds.end(); ++itr) {
         // get object pointer
@@ -644,7 +642,7 @@ void cAudio::Update(void)
     }
 
     // if music is enabled but nothing is playing
-    if (m_music_enabled && !Is_Music_Playing()) {
+    if (m_music_enabled && !Is_Music_Playing() && !m_next_music.empty()) {
         // play the next song in the queue
         NextMusicInfo next = m_next_music.front();
         m_next_music.pop();

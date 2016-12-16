@@ -19,7 +19,6 @@
 #include "../audio/audio.hpp"
 #include "../core/game_core.hpp"
 #include "../gui/generic.hpp"
-#include "../video/font.hpp"
 #include "../overworld/overworld.hpp"
 #include "../campaign/campaign_manager.hpp"
 #include "../user/preferences.hpp"
@@ -30,6 +29,7 @@
 #include "../user/savegame/savegame.hpp"
 #include "../video/renderer.hpp"
 #include "../video/loading_screen.hpp"
+#include "../video/img_manager.hpp"
 #include "../level/level.hpp"
 #include "../input/keyboard.hpp"
 #include "../level/level_settings.hpp"
@@ -46,7 +46,12 @@ using namespace std;
 
 namespace fs = boost::filesystem;
 
+// extern variables
+CEGUI::String TSC::listbox_search_buffer;
+float TSC::listbox_search_buffer_counter = 0.0f;
+
 namespace TSC {
+
 
 /* *** *** *** *** *** *** *** *** cMenu_Base *** *** *** *** *** *** *** *** *** */
 
@@ -188,6 +193,10 @@ cMenu_Main::cMenu_Main(void)
     mp_current_inactive_item = NULL;
     mp_current_active_item   = NULL;
 
+    mp_credits_item = CEGUI::WindowManager::getSingleton().createWindow("TaharezLook/StaticText");
+    mp_credits_item->subscribeEvent(CEGUI::Window::EventMouseClick, CEGUI::Event::Subscriber(&cMenu_Main::credits_item_clicked, this));
+    mp_credits_item->subscribeEvent(CEGUI::Window::EventMouseEntersArea, CEGUI::Event::Subscriber(&cMenu_Main::credits_item_entered, this));
+
     m_start_index   = -1;
     m_options_index = -1;
     m_load_index    = -1;
@@ -211,6 +220,9 @@ cMenu_Main::~cMenu_Main(void)
     delete mp_save_inactive;
     delete mp_quit_active;
     delete mp_quit_inactive;
+
+    CEGUI::System::getSingleton().getDefaultGUIContext().getRootWindow()->removeChild(mp_credits_item);
+    CEGUI::WindowManager::getSingleton().destroyWindow(mp_credits_item);
 }
 
 void cMenu_Main::Init(void)
@@ -316,14 +328,17 @@ void cMenu_Main::Init(void)
     // Only show the credit menu entry and the SFML logo on the title
     // screen, not in the in-game menu.
     if (m_exit_to_gamemode == MODE_NOTHING) {
-        // Credits
-        pFont->Prepare_SFML_Text(m_credits_item, _("Credits"), 0.56 * game_res_w, game_res_h * 1.2, cFont_Manager::FONTSIZE_NORMAL, yellow, true);
-        m_credits_index = pMenuCore
-            ->m_handler
-            ->Add_Menu_Item(sf::FloatRect(m_credits_item.getPosition().x * global_downscalex,         // SFML does not know about TSC's global_scale{x,y},
-                                          m_credits_item.getPosition().y * global_downscaley,         // so we need to manually include this when drawing
-                                          m_credits_item.getGlobalBounds().width * global_downscalex, // with SFML.
-                                          m_credits_item.getGlobalBounds().height * global_downscaley), NULL);
+        mp_credits_item->setText(_("Credits"));
+        mp_credits_item->setProperty("TextColours", "tl:FFFFFF00 tr:FFFFFF00 bl:FFFFFF00 br:FFFFFF00");
+        mp_credits_item->setProperty("FrameEnabled", "False");
+        mp_credits_item->setProperty("BackgroundEnabled", "False");
+        mp_credits_item->setPosition(CEGUI::UVector2(CEGUI::UDim(0.44, 0), CEGUI::UDim(0.95, 0)));
+        mp_credits_item->setSize(CEGUI::USize(CEGUI::UDim(0.12, 0), CEGUI::UDim(0.05, 0)));
+        CEGUI::System::getSingleton().getDefaultGUIContext().getRootWindow()->addChild(mp_credits_item);
+
+        // Only to make the menu handler code happy. CEGUI does its own coordinate mapping
+        // for mouse clicks.
+        m_credits_index = pMenuCore->m_handler->Add_Menu_Item(sf::FloatRect(0, 0, 0, 0), NULL);
 
         // SFML logo
         cHudSprite* hud_sprite = new cHudSprite(pMenuCore->m_handler->m_level->m_sprite_manager);
@@ -370,7 +385,7 @@ void cMenu_Main::Exit(void)
 void cMenu_Main::Selected_Item_Changed(int new_active_item)
 {
     cMenu_Base::Selected_Item_Changed(new_active_item);
-    m_credits_item.setColor(yellow.Get_SFML_Color());
+    mp_credits_item->setProperty("TextColours", "tl:FFFFFF00 tr:FFFFFF00 bl:FFFFFF00 br:FFFFFF00");
 
     if (mp_current_inactive_item) {
         mp_current_inactive_item->Set_Scale(1);
@@ -416,6 +431,20 @@ void cMenu_Main::Selected_Item_Changed(int new_active_item)
         mp_current_inactive_item = NULL;
         break;
     }
+}
+
+// Translate the CEGUI event into something the menu handler understands
+// by imitating the results of a mouse input event on the menu handler.
+void cMenu_Main::credits_item_clicked(const CEGUI::EventArgs& event)
+{
+    pMenuCore->m_handler->Set_Active(m_credits_index);
+    Item_Activated(m_credits_index);
+}
+
+// Similar for mouse enter.
+void cMenu_Main::credits_item_entered(const CEGUI::EventArgs& event)
+{
+    pMenuCore->m_handler->Set_Active(m_credits_index);
 }
 
 void cMenu_Main::Update(void)
@@ -488,7 +517,7 @@ void cMenu_Main::Draw(void)
     }
 
     if (pMenuCore->m_handler->m_active == m_credits_index)
-        m_credits_item.setColor(red.Get_SFML_Color());
+        mp_credits_item->setProperty("TextColours", "tl:FFFF0000 tr:FFFF0000 bl:FFFF0000 br:FFFF0000");
 
     mp_start_inactive->Draw();
     mp_options_inactive->Draw();
@@ -500,8 +529,6 @@ void cMenu_Main::Draw(void)
         mp_current_active_item->Draw();
     }
 
-    pFont->Queue_Text(m_credits_item);
-
     Draw_End();
 }
 
@@ -510,7 +537,7 @@ void cMenu_Main::Draw(void)
 cMenu_Start::cMenu_Start(void)
     : cMenu_Base()
 {
-    m_listbox_search_buffer_counter = 0.0f;
+
 }
 
 cMenu_Start::~cMenu_Start(void)
@@ -520,8 +547,6 @@ cMenu_Start::~cMenu_Start(void)
 
 void cMenu_Start::Init(void)
 {
-    m_listbox_search_buffer_counter = 0.0f;
-
     cMenu_Base::Init();
 
     m_layout_file = "menu/start.layout";
@@ -590,8 +615,8 @@ void cMenu_Start::Init_GUI(void)
     }
 
     // events
-    listbox_packages->subscribeEvent(CEGUI::Window::EventKeyDown, CEGUI::Event::Subscriber(&cMenu_Start::Listbox_Keydown, this));
-    listbox_packages->subscribeEvent(CEGUI::Window::EventCharacterKey, CEGUI::Event::Subscriber(&cMenu_Start::Listbox_Character_Key, this));
+    listbox_packages->subscribeEvent(CEGUI::Window::EventKeyDown, CEGUI::Event::Subscriber(&Listbox_Keydown));
+    listbox_packages->subscribeEvent(CEGUI::Window::EventCharacterKey, CEGUI::Event::Subscriber(&Listbox_Character_Key));
     listbox_packages->subscribeEvent(CEGUI::Listbox::EventSelectionChanged, CEGUI::Event::Subscriber(&cMenu_Start::Package_Select, this));
     listbox_packages->subscribeEvent(CEGUI::Listbox::EventMouseDoubleClick, CEGUI::Event::Subscriber(&cMenu_Start::Package_Select_final_list, this));
 
@@ -599,8 +624,8 @@ void cMenu_Start::Init_GUI(void)
     CEGUI::Listbox* listbox_campaigns = static_cast<CEGUI::Listbox*>(p_root->getChild("menu_overworld/tabcontrol_main/tab_campaign/listbox_campaigns"));
 
     // events
-    listbox_campaigns->subscribeEvent(CEGUI::Window::EventKeyDown, CEGUI::Event::Subscriber(&cMenu_Start::Listbox_Keydown, this));
-    listbox_campaigns->subscribeEvent(CEGUI::Window::EventCharacterKey, CEGUI::Event::Subscriber(&cMenu_Start::Listbox_Character_Key, this));
+    listbox_campaigns->subscribeEvent(CEGUI::Window::EventKeyDown, CEGUI::Event::Subscriber(&Listbox_Keydown));
+    listbox_campaigns->subscribeEvent(CEGUI::Window::EventCharacterKey, CEGUI::Event::Subscriber(&Listbox_Character_Key));
     listbox_campaigns->subscribeEvent(CEGUI::Listbox::EventSelectionChanged, CEGUI::Event::Subscriber(&cMenu_Start::Campaign_Select, this));
     listbox_campaigns->subscribeEvent(CEGUI::Listbox::EventMouseDoubleClick, CEGUI::Event::Subscriber(&cMenu_Start::Campaign_Select_final_list, this));
 
@@ -608,8 +633,8 @@ void cMenu_Start::Init_GUI(void)
     CEGUI::Listbox* listbox_worlds = static_cast<CEGUI::Listbox*>(p_root->getChild("menu_overworld/tabcontrol_main/tab_world/listbox_worlds"));
 
     // events
-    listbox_worlds->subscribeEvent(CEGUI::Window::EventKeyDown, CEGUI::Event::Subscriber(&cMenu_Start::Listbox_Keydown, this));
-    listbox_worlds->subscribeEvent(CEGUI::Window::EventCharacterKey, CEGUI::Event::Subscriber(&cMenu_Start::Listbox_Character_Key, this));
+    listbox_worlds->subscribeEvent(CEGUI::Window::EventKeyDown, CEGUI::Event::Subscriber(&Listbox_Keydown));
+    listbox_worlds->subscribeEvent(CEGUI::Window::EventCharacterKey, CEGUI::Event::Subscriber(&Listbox_Character_Key));
     listbox_worlds->subscribeEvent(CEGUI::Listbox::EventSelectionChanged, CEGUI::Event::Subscriber(&cMenu_Start::World_Select, this));
     listbox_worlds->subscribeEvent(CEGUI::Listbox::EventMouseDoubleClick, CEGUI::Event::Subscriber(&cMenu_Start::World_Select_final_list, this));
 
@@ -620,8 +645,8 @@ void cMenu_Start::Init_GUI(void)
     // events
     listbox_levels->subscribeEvent(CEGUI::Listbox::EventSelectionChanged, CEGUI::Event::Subscriber(&cMenu_Start::Level_Select, this));
     listbox_levels->subscribeEvent(CEGUI::Listbox::EventMouseDoubleClick, CEGUI::Event::Subscriber(&cMenu_Start::Level_Select_Final_List, this));
-    listbox_levels->subscribeEvent(CEGUI::Window::EventKeyDown, CEGUI::Event::Subscriber(&cMenu_Start::Listbox_Keydown, this));
-    listbox_levels->subscribeEvent(CEGUI::Window::EventCharacterKey, CEGUI::Event::Subscriber(&cMenu_Start::Listbox_Character_Key, this));
+    listbox_levels->subscribeEvent(CEGUI::Window::EventKeyDown, CEGUI::Event::Subscriber(&Listbox_Keydown));
+    listbox_levels->subscribeEvent(CEGUI::Window::EventCharacterKey, CEGUI::Event::Subscriber(&Listbox_Character_Key));
 
     // Level Buttons
     CEGUI::PushButton* button_new = static_cast<CEGUI::PushButton*>(p_root->getChild("menu_overworld/tabcontrol_main/tab_level/button_level_new"));
@@ -692,17 +717,7 @@ void cMenu_Start::Exit(void)
 
 void cMenu_Start::Update(void)
 {
-    // if search buffer is active
-    if (m_listbox_search_buffer_counter > 0.0f) {
-        m_listbox_search_buffer_counter -= pFramerate->m_speed_factor;
-
-        // if time limit reached search buffer is abandoned
-        if (m_listbox_search_buffer_counter <= 0.0f) {
-            m_listbox_search_buffer_counter = 0.0f;
-            m_listbox_search_buffer.clear();
-        }
-    }
-
+    Listbox_Searchbuffer_Update();
     cMenu_Base::Update();
 
     if (!m_action) {
@@ -1046,12 +1061,15 @@ bool cMenu_Start::TabControl_Selection_Changed(const CEGUI::EventArgs& e)
     CEGUI::TabControl* tabcontrol = static_cast<CEGUI::TabControl*>(windowEventArgs.window);
 
     if (tabcontrol->getSelectedTabIndex() == 0) {
-        static_cast<CEGUI::Listbox*>(p_root->getChild("menu_overworld/tabcontrol_main/tab_campaign/listbox_campaigns"))->activate();
+        static_cast<CEGUI::Listbox*>(p_root->getChild("menu_overworld/tabcontrol_main/tab_package/listbox_packages"))->activate();
     }
     else if (tabcontrol->getSelectedTabIndex() == 1) {
-        static_cast<CEGUI::Listbox*>(p_root->getChild("menu_overworld/tabcontrol_main/tab_world/listbox_worlds"))->activate();
+        static_cast<CEGUI::Listbox*>(p_root->getChild("menu_overworld/tabcontrol_main/tab_campaign/listbox_campaigns"))->activate();
     }
     else if (tabcontrol->getSelectedTabIndex() == 2) {
+        static_cast<CEGUI::Listbox*>(p_root->getChild("menu_overworld/tabcontrol_main/tab_world/listbox_worlds"))->activate();
+    }
+    else if (tabcontrol->getSelectedTabIndex() == 3) {
         static_cast<CEGUI::Listbox*>(p_root->getChild("menu_overworld/tabcontrol_main/tab_level/listbox_levels"))->activate();
     }
 
@@ -1104,7 +1122,7 @@ bool cMenu_Start::TabControl_Keydown(const CEGUI::EventArgs& e)
     return 0;
 }
 
-bool cMenu_Start::Listbox_Keydown(const CEGUI::EventArgs& e)
+bool Listbox_Keydown(const CEGUI::EventArgs& e)
 {
     const CEGUI::KeyEventArgs& ke = static_cast<const CEGUI::KeyEventArgs&>(e);
 
@@ -1112,9 +1130,14 @@ bool cMenu_Start::Listbox_Keydown(const CEGUI::EventArgs& e)
     CEGUI::Listbox* listbox = static_cast<CEGUI::Listbox*>(ke.window);
 
     // Down/Up (todo: detect event for joystick properly when CEGUI supports these events)
-    if (ke.scancode == CEGUI::Key::ArrowDown || ke.scancode == CEGUI::Key::ArrowUp || ke.scancode == CEGUI::Key::PageDown || ke.scancode == CEGUI::Key::PageUp ||
-            ke.scancode == CEGUI::Key::Home || ke.scancode == CEGUI::Key::End ||
-            ke.scancode == pKeyboard->SFMLKey_to_CEGUIKey(pPreferences->m_key_up) || ke.scancode == pKeyboard->SFMLKey_to_CEGUIKey(pPreferences->m_key_down)) {
+    if (listbox->getItemCount() > 0 && (ke.scancode == CEGUI::Key::ArrowDown ||
+                                        ke.scancode == CEGUI::Key::ArrowUp ||
+                                        ke.scancode == CEGUI::Key::PageDown ||
+                                        ke.scancode == CEGUI::Key::PageUp ||
+                                        ke.scancode == CEGUI::Key::Home ||
+                                        ke.scancode == CEGUI::Key::End ||
+                                        ke.scancode == pKeyboard->SFMLKey_to_CEGUIKey(pPreferences->m_key_up) ||
+                                        ke.scancode == pKeyboard->SFMLKey_to_CEGUIKey(pPreferences->m_key_down))) {
         int new_selected = 0;
         int last_selected = 0;
 
@@ -1179,13 +1202,13 @@ bool cMenu_Start::Listbox_Keydown(const CEGUI::EventArgs& e)
         listbox->setItemSelectState(new_selected, 1);
         listbox->ensureItemIsVisible(new_selected);
 
-        return 1;
+        return true;
     }
 
-    return 0;
+    return false;
 }
 
-bool cMenu_Start::Listbox_Character_Key(const CEGUI::EventArgs& e)
+bool Listbox_Character_Key(const CEGUI::EventArgs& e)
 {
     const CEGUI::KeyEventArgs& ke = static_cast<const CEGUI::KeyEventArgs&>(e);
 
@@ -1193,8 +1216,8 @@ bool cMenu_Start::Listbox_Character_Key(const CEGUI::EventArgs& e)
     CEGUI::Listbox* listbox = static_cast<CEGUI::Listbox*>(ke.window);
 
     if (listbox->getFont()->isCodepointAvailable(ke.codepoint)) {
-        m_listbox_search_buffer_counter = speedfactor_fps;
-        m_listbox_search_buffer.insert(m_listbox_search_buffer.end(), 1, ke.codepoint);
+        listbox_search_buffer_counter = speedfactor_fps;
+        listbox_search_buffer.insert(listbox_search_buffer.end(), 1, ke.codepoint);
 
         // new selected if found
         CEGUI::ListboxItem* new_selected = NULL;
@@ -1206,7 +1229,7 @@ bool cMenu_Start::Listbox_Character_Key(const CEGUI::EventArgs& e)
             CEGUI::ListboxItem* item = listbox->getListboxItemFromIndex(index);
 
             // found
-            if (item->getText().substr(0, m_listbox_search_buffer.length()).compare(m_listbox_search_buffer) == 0) {
+            if (item->getText().substr(0, listbox_search_buffer.length()).compare(listbox_search_buffer) == 0) {
                 new_selected = item;
                 break;
             }
@@ -1224,6 +1247,20 @@ bool cMenu_Start::Listbox_Character_Key(const CEGUI::EventArgs& e)
     }
 
     return 0;
+}
+
+void Listbox_Searchbuffer_Update()
+{
+    // if search buffer is active
+    if (listbox_search_buffer_counter > 0.0f) {
+        listbox_search_buffer_counter -= pFramerate->m_speed_factor;
+
+        // if time limit reached search buffer is abandoned
+        if (listbox_search_buffer_counter <= 0.0f) {
+            listbox_search_buffer_counter = 0.0f;
+            listbox_search_buffer.clear();
+        }
+    }
 }
 
 bool cMenu_Start::Package_Select(const CEGUI::EventArgs& event)
@@ -1916,10 +1953,6 @@ void cMenu_Options::Init_GUI_Joystick(void)
     CEGUI::Window* text_joystick_sensitivity = p_root->getChild("options/window_options/tabcontrol_main/tab_joystick/joystick_text_sensitivity");
     text_joystick_sensitivity->setText(UTF8_("Sensitivity"));
 
-    // Joystick analog jump text
-    CEGUI::Window* text_joystick_analog_jump = p_root->getChild("options/window_options/tabcontrol_main/tab_joystick/joystick_text_analog_jump");
-    text_joystick_analog_jump->setText(UTF8_("Analog Jump"));
-
     // Joystick name
     CEGUI::Window* text_joystick_name = p_root->getChild("options/window_options/tabcontrol_main/tab_joystick/joystick_text_name");
     text_joystick_name->setText(UTF8_("Joystick"));
@@ -1962,25 +1995,6 @@ void cMenu_Options::Init_GUI_Joystick(void)
     CEGUI::Slider* slider_joy_sensitivity = static_cast<CEGUI::Slider*>(p_root->getChild("options/window_options/tabcontrol_main/tab_joystick/joystick_slider_sensitivity"));
     slider_joy_sensitivity->setCurrentValue(pPreferences->m_joy_axis_threshold);
     slider_joy_sensitivity->subscribeEvent(CEGUI::Slider::EventValueChanged, CEGUI::Event::Subscriber(&cMenu_Options::Joystick_Sensitivity_Changed, this));
-
-    // Joystick analog jump
-    CEGUI::Combobox* combo_joy_analog_jump = static_cast<CEGUI::Combobox*>(p_root->getChild("options/window_options/tabcontrol_main/tab_joystick/joystick_combo_analog_jump"));
-
-    item = new CEGUI::ListboxTextItem(UTF8_("On"));
-    item->setTextColours(CEGUI::Colour(0, 0, 1));
-    combo_joy_analog_jump->addItem(item);
-    item = new CEGUI::ListboxTextItem(UTF8_("Off"));
-    item->setTextColours(CEGUI::Colour(0, 1, 0));
-    combo_joy_analog_jump->addItem(item);
-
-    if (pPreferences->m_joy_analog_jump) {
-        combo_joy_analog_jump->setText(UTF8_("On"));
-    }
-    else {
-        combo_joy_analog_jump->setText(UTF8_("Off"));
-    }
-
-    combo_joy_analog_jump->subscribeEvent(CEGUI::Combobox::EventListSelectionAccepted, CEGUI::Event::Subscriber(&cMenu_Options::Joystick_Analog_Jump_Select, this));
 
     // First horizontal joystick axis
     CEGUI::Window* text_joystick_axis_hor = p_root->getChild("options/window_options/tabcontrol_main/tab_joystick/joystick_text_axis_hor");
@@ -2405,11 +2419,15 @@ void cMenu_Options::Build_Shortcut_List(bool joystick /* = 0 */)
         std::string shortcut_key;
         bool shortcut_not_the_default = 0;
 
+        item = new CEGUI::ListboxTextItem("");
+
         // Keyboard
         if (!joystick) {
             sf::Keyboard::Key* key = static_cast<sf::Keyboard::Key*>(shortcut_item.m_key);
             const sf::Keyboard::Key* key_default = static_cast<const sf::Keyboard::Key*>(shortcut_item.m_key_default);
             shortcut_key = Get_SFML_Key_Name(*key);
+            item->setText(shortcut_key);
+            item->setUserData(key);
 
             if (*key != *key_default) {
                 shortcut_not_the_default = 1;
@@ -2420,13 +2438,14 @@ void cMenu_Options::Build_Shortcut_List(bool joystick /* = 0 */)
             uint8_t* button = static_cast<uint8_t*>(shortcut_item.m_key);
             const uint8_t* button_default = static_cast<const uint8_t*>(shortcut_item.m_key_default);
             shortcut_key = int_to_string(*button);
+            item->setText(shortcut_key);
+            item->setUserData(button);
 
             if (*button != *button_default) {
                 shortcut_not_the_default = 1;
             }
         }
 
-        item = new CEGUI::ListboxTextItem(shortcut_key);
         // if not default
         if (shortcut_not_the_default) {
             item->setTextColours(CEGUI::Colour(0.9f, 0.6f, 0.0f));
@@ -2477,8 +2496,9 @@ void cMenu_Options::Set_Shortcut(std::string name, void* data, bool joystick /* 
         }
         // Joystick
         else {
-            unsigned int* button = static_cast<unsigned int*>(data);
-            *button = input_event.joystickButton.button;
+            uint8_t* button = static_cast<uint8_t*>(data);
+            unsigned int buttonTemp = input_event.joystickButton.button;
+            *button = static_cast<uint8_t>(buttonTemp);
         }
 
         sub_done = 1;
@@ -3013,22 +3033,6 @@ bool cMenu_Options::Joystick_Sensitivity_Changed(const CEGUI::EventArgs& event)
     return 1;
 }
 
-bool cMenu_Options::Joystick_Analog_Jump_Select(const CEGUI::EventArgs& event)
-{
-    const CEGUI::WindowEventArgs& windowEventArgs = static_cast<const CEGUI::WindowEventArgs&>(event);
-    CEGUI::ListboxItem* item = static_cast<CEGUI::Combobox*>(windowEventArgs.window)->getSelectedItem();
-
-    bool analog_jump = 0;
-
-    if (item->getText().compare(_("On")) == 0) {
-        analog_jump = 1;
-    }
-
-    pPreferences->m_joy_analog_jump = analog_jump;
-
-    return 1;
-}
-
 bool cMenu_Options::Joystick_Spinner_Axis_Hor_Changed(const CEGUI::EventArgs& event)
 {
     const CEGUI::WindowEventArgs& windowEventArgs = static_cast<const CEGUI::WindowEventArgs&>(event);
@@ -3155,9 +3159,6 @@ cMenu_Savegames::cMenu_Savegames(bool type)
 {
     m_type_save = type;
     m_menu_pos_y = 200.0f;
-    m_back_item_index = -1;
-    m_scaling_up = true;
-    mp_current_item = NULL;
 }
 
 cMenu_Savegames::~cMenu_Savegames(void)
@@ -3169,18 +3170,7 @@ void cMenu_Savegames::Init(void)
 {
     cMenu_Base::Init();
 
-    // savegame descriptions
-    Update_Saved_Games_Text();
-
-    // back
-    pFont->Prepare_SFML_Text(m_back_text, _("Back"), static_cast<float>(game_res_w) / 18, 400, cFont_Manager::FONTSIZE_NORMAL, m_text_color, true);
-    m_back_item_index = pMenuCore
-        ->m_handler
-        ->Add_Menu_Item(sf::FloatRect(m_back_text.getPosition().x * global_downscalex,
-                                      m_back_text.getPosition().y * global_downscaley,
-                                      m_back_text.getGlobalBounds().width * global_downscalex,
-                                      m_back_text.getGlobalBounds().height * global_downscaley),
-                        NULL);
+    m_layout_file = "menu/savegame.layout";
 
     if (m_type_save) {
         cHudSprite* hud_sprite = new cHudSprite(pMenuCore->m_handler->m_level->m_sprite_manager);
@@ -3209,6 +3199,38 @@ void cMenu_Savegames::Init(void)
 void cMenu_Savegames::Init_GUI(void)
 {
     cMenu_Base::Init_GUI();
+
+    CEGUI::Window* p_tab             = static_cast<CEGUI::Listbox*>(m_gui_window->getChild("savegame_tabcontrol/tab_savegame"));
+    CEGUI::Window* p_caption         = p_tab->getChild("caption_text");
+    CEGUI::PushButton* p_ok_button   = static_cast<CEGUI::PushButton*>(p_tab->getChild("ok_button"));
+    CEGUI::PushButton* p_back_button = static_cast<CEGUI::PushButton*>(p_tab->getChild("back_button"));
+    CEGUI::Listbox* p_listbox        = static_cast<CEGUI::Listbox*>(p_tab->getChild("savegame_listbox"));
+
+    m_gui_window->subscribeEvent(CEGUI::Window::EventKeyDown, CEGUI::Event::Subscriber(&cMenu_Savegames::TabControl_Keydown, this));
+
+    if (m_type_save) {
+        p_tab->setText(UTF8_("Save"));
+        p_caption->setText(UTF8_("Save the game"));
+        p_ok_button->setText(UTF8_("Save"));
+
+        p_ok_button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&cMenu_Savegames::Button_Save_Clicked, this));
+    }
+    else {
+        p_tab->setText(UTF8_("Load"));
+        p_caption->setText(UTF8_("Load a saved game"));
+        p_ok_button->setText(UTF8_("Load"));
+
+        p_ok_button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&cMenu_Savegames::Button_Load_Clicked, this));
+    }
+
+    p_back_button->setText(_("Back"));
+    p_back_button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&cMenu_Savegames::Button_Back_Clicked, this));
+
+    // Give input focus to the listbox so keyboard navigation works.
+    p_listbox->subscribeEvent(CEGUI::Window::EventKeyDown, CEGUI::Event::Subscriber(&Listbox_Keydown));
+    p_listbox->activate();
+
+    Update_Saved_Games_Text();
 }
 
 void cMenu_Savegames::Exit(void)
@@ -3220,107 +3242,39 @@ void cMenu_Savegames::Exit(void)
     }
 }
 
-void cMenu_Savegames::Selected_Item_Changed(int new_active_item)
+bool cMenu_Savegames::Button_Load_Clicked(const CEGUI::EventArgs& event)
 {
-    cMenu_Base::Selected_Item_Changed(new_active_item);
+    CEGUI::Listbox* p_listbox = static_cast<CEGUI::Listbox*>(m_gui_window->getChild("savegame_tabcontrol/tab_savegame/savegame_listbox"));
+    CEGUI::ListboxItem* p_item = p_listbox->getFirstSelectedItem();
+    int slot = p_listbox->getItemIndex(p_item) + 1;
 
-    // Reset the previous current item to its original state
-    if (mp_current_item)
-        mp_current_item->setScale(1.0f, 1.0f);
-
-    mp_current_item = NULL;
-
-    if (new_active_item < 0)
-        return;
-
-    if (static_cast<unsigned int>(new_active_item) < NUM_SAVEGAME_SLOTS)
-        mp_current_item = &m_slot_texts[new_active_item];
-    else if (new_active_item == m_back_item_index)
-        mp_current_item = &m_back_text;
-}
-
-void cMenu_Savegames::Update(void)
-{
-    cMenu_Base::Update();
-
-    if (mp_current_item) {
-        float scale = mp_current_item->getScale().x + ((m_scaling_up ? 0.02f : -0.02f) * pFramerate->m_speed_factor);
-        mp_current_item->setScale(scale, scale);
-
-        if (scale >= 1.1f)
-            m_scaling_up = false;
-        else if (scale <= 1.0f)
-            m_scaling_up = true;
-    }
-
-    if (!m_action) {
-        return;
-    }
-
-    m_action = 0;
-
-    // back
-    if (pMenuCore->m_handler->m_active == 9) {
-        Exit();
-        return;
-    }
-
-    if (!m_type_save) {
-        Update_Load();
-    }
-    else {
-        Update_Save();
-    }
-}
-
-void cMenu_Savegames::Draw(void)
-{
-    cMenu_Base::Draw();
-
-    for(unsigned int i=0; i < NUM_SAVEGAME_SLOTS; i++) {
-        pFont->Queue_Text(m_slot_texts[i]);
-    }
-
-    pFont->Queue_Text(m_back_text);
-
-    Draw_End();
-}
-
-void cMenu_Savegames::Update_Load(void)
-{
-    int save_num = pMenuCore->m_handler->m_active + 1;
-
-    // not valid
-    if (!pSavegame->Is_Valid(save_num)) {
-        return;
-    }
-
-    cSave* savegame = NULL;
+    cSave* p_savegame = NULL;
     try {
-        savegame = pSavegame->Load(save_num);
+        p_savegame = pSavegame->Load(slot);
     }
-    catch(xmlpp::parse_error& err) {
+        catch(xmlpp::parse_error& err) {
         pAudio->Play_Sound("error.ogg");
-        std::cerr << "Error: Failed to load savegame '" << save_num << "' (parsing error). xmlpp parsing exception: " << err.what() << std::endl;
-        return;
+        std::cerr << "Error: Failed to load savegame '" << slot << "' (parsing error). xmlpp parsing exception: " << err.what() << std::endl;
+        return true;
     }
     catch(InvalidSavegameError& err) {
         pAudio->Play_Sound("error.ogg");
-        std::cerr << "Error: Failed to load savegame '" << save_num << "' (invalid savegame). TSC exception: " << err.what() << std::endl;
-        return;
+        std::cerr << "Error: Failed to load savegame '" << slot << "' (invalid savegame). TSC exception: " << err.what() << std::endl;
+        return true;
     }
     catch(InvalidLevelError& err) {
         pAudio->Play_Sound("error.ogg");
-        std::cerr << "Error: Failed to load savegame '" << save_num << "' (invalid level). TSC exception: " << err.what() << std::endl;
-        return;
+        std::cerr << "Error: Failed to load savegame '" << slot << "' (invalid level). TSC exception: " << err.what() << std::endl;
+        return true;
     }
 
     // reset before actually loading the level to keep the level in the manager
     pLevel_Player->Reset_Save();
 
     pAudio->Play_Sound("savegame_load.ogg");
-    std::string level_name = savegame->Get_Active_Level();
-    delete savegame;
+    std::string level_name = p_savegame->Get_Active_Level();
+    delete p_savegame;
+    p_savegame = NULL;
 
     if (!level_name.empty()) {
         Game_Action = GA_ENTER_LEVEL;
@@ -3338,33 +3292,40 @@ void cMenu_Savegames::Update_Load(void)
     Game_Action_Data_Start.add("screen_fadeout", int_to_string(EFFECT_OUT_BLACK));
     Game_Action_Data_Start.add("screen_fadeout_speed", "3");
     Game_Action_Data_Middle.add("unload_menu", "1");
-    Game_Action_Data_Middle.add("load_savegame", int_to_string(save_num));
+    Game_Action_Data_Middle.add("load_savegame", int_to_string(slot));
     Game_Action_Data_End.add("screen_fadein", int_to_string(EFFECT_IN_BLACK));
     Game_Action_Data_End.add("screen_fadein_speed", "3");
+
+    return true;
 }
 
-void cMenu_Savegames::Update_Save(void)
+bool cMenu_Savegames::Button_Save_Clicked(const CEGUI::EventArgs& event)
 {
-    // not valid
+    // not valid (most likely title screen)
     if (pOverworld_Player->m_current_waypoint < 0 && !pActive_Level->Is_Loaded()) {
-        return;
+        return true;
     }
 
-    std::string descripion = Set_Save_Description(pMenuCore->m_handler->m_active + 1);
+    CEGUI::Listbox* p_listbox = static_cast<CEGUI::Listbox*>(m_gui_window->getChild("savegame_tabcontrol/tab_savegame/savegame_listbox"));
+    CEGUI::ListboxItem* p_item = p_listbox->getFirstSelectedItem();
+    int slot = p_listbox->getItemIndex(p_item) + 1;
+
+    std::string description = Set_Save_Description(slot);
 
     pFramerate->Reset();
 
-    if (descripion.compare("Not enough Points") == 0) {
+    if (description.compare("Not enough Points") == 0) { // String comparison intentional, see body of Set_Save_Description()
         Game_Action = GA_ENTER_MENU;
         Game_Action_Data_Middle.add("load_menu", int_to_string(MENU_MAIN));
         if (m_exit_to_gamemode != MODE_NOTHING) {
             Game_Action_Data_Middle.add("menu_exit_back_to", int_to_string(m_exit_to_gamemode));
         }
-        return;
+        return true;
     }
 
-    if (descripion.empty()) {
-        return;
+    // Do nothing if the slot is empty
+    if (description.empty()) {
+        return true;
     }
 
     pAudio->Play_Sound("savegame_save.ogg");
@@ -3376,13 +3337,39 @@ void cMenu_Savegames::Update_Save(void)
     }
 #endif
     // save
-    pSavegame->Save_Game(pMenuCore->m_handler->m_active + 1, descripion);
+    pSavegame->Save_Game(slot, description);
 
     Game_Action = GA_ENTER_MENU;
     Game_Action_Data_Middle.add("load_menu", int_to_string(MENU_MAIN));
     if (m_exit_to_gamemode != MODE_NOTHING) {
         Game_Action_Data_Middle.add("menu_exit_back_to", int_to_string(m_exit_to_gamemode));
     }
+
+    return true;
+}
+
+bool cMenu_Savegames::Button_Back_Clicked(const CEGUI::EventArgs& event)
+{
+    Exit();
+    return true;
+}
+
+bool cMenu_Savegames::TabControl_Keydown(const CEGUI::EventArgs& event)
+{
+    const CEGUI::KeyEventArgs& ke = static_cast<const CEGUI::KeyEventArgs&>(event);
+
+    // Button_Save_Clicked() and Button_Load_Clicked() do not use their argument anyway,
+    // so simply call them with a nonsense argument.
+    if (ke.scancode == CEGUI::Key::Return || ke.scancode == CEGUI::Key::NumpadEnter) {
+        if (m_type_save)
+            Button_Save_Clicked(event);
+        else
+            Button_Load_Clicked(event);
+
+        return true;
+    }
+
+    return false;
 }
 
 std::string cMenu_Savegames::Set_Save_Description(unsigned int save_slot)
@@ -3396,6 +3383,8 @@ std::string cMenu_Savegames::Set_Save_Description(unsigned int save_slot)
         Clear_Input_Events();
         Draw_Static_Text(_("3000 Points needed for saving in a level.\nSaving on the Overworld is free."));
 
+        // FIXME: This is so hacky I can't even describe it.
+        // This is checked against by the caller!
         return "Not enough Points";
     }
 #endif
@@ -3431,6 +3420,8 @@ std::string cMenu_Savegames::Set_Save_Description(unsigned int save_slot)
 
 void cMenu_Savegames::Update_Saved_Games_Text(void)
 {
+    CEGUI::Listbox* p_listbox = static_cast<CEGUI::Listbox*>(m_gui_window->getChild("savegame_tabcontrol/tab_savegame/savegame_listbox"));
+
     for(unsigned int i=0; i < NUM_SAVEGAME_SLOTS; i++) {
         std::string text;
         Color color = m_text_color_value;
@@ -3455,14 +3446,16 @@ void cMenu_Savegames::Update_Saved_Games_Text(void)
             text = _("Savegame loading failed");
         }
 
-        pFont->Prepare_SFML_Text(m_slot_texts[i], text, static_cast<float>(game_res_w) / 2.5, m_menu_pos_y, cFont_Manager::FONTSIZE_NORMAL, color, true);
-        sf::FloatRect rect(m_slot_texts[i].getPosition().x * global_downscalex,
-                           m_slot_texts[i].getPosition().y * global_downscaley,
-                           m_slot_texts[i].getGlobalBounds().width * global_downscalex,
-                           m_slot_texts[i].getGlobalBounds().height * global_downscaley);
+        CEGUI::ListboxTextItem* p_item = new CEGUI::ListboxTextItem(text);
+        p_item->setSelectionColours(CEGUI::Colour(0.33f, 0.33f, 0.33f));
+        p_item->setSelectionBrushImage("TaharezLook/ListboxSelectionBrush");
+        p_listbox->addItem(p_item);
 
-        pMenuCore->m_handler->Add_Menu_Item(rect, NULL);
-        m_menu_pos_y += rect.height + 16.0f;
+        // TODO: Use `color' variable for the text color
+
+        if (i == 0) {
+            p_item->setSelected(true);
+        }
     }
 }
 
@@ -3472,12 +3465,19 @@ cMenu_Credits::cMenu_Credits(cHudSprite* p_tsc_logo)
     : cMenu_Base()
 {
     mp_tsc_logo = p_tsc_logo;
-    m_back_index = -1;
 }
 
 cMenu_Credits::~cMenu_Credits(void)
 {
     mp_tsc_logo = NULL;
+
+    CEGUI::Window* p_root = CEGUI::System::getSingleton().getDefaultGUIContext().getRootWindow();
+    CEGUI::WindowManager& wmgr = CEGUI::WindowManager::getSingleton();
+    std::vector<CEGUI::Window*>::iterator iter;
+    for(iter=m_credit_lines.begin(); iter != m_credit_lines.end(); iter++) {
+        p_root->removeChild(*iter);
+        wmgr.destroyWindow(*iter);
+    }
 }
 
 void cMenu_Credits::Init(void)
@@ -3519,31 +3519,24 @@ void cMenu_Credits::Init(void)
         last_position = position;
     }
 
-    m_menu_pos_y = game_res_h * 1.4f;
+    float pos_y = game_res_h * 1.4f;
 
     // set credits position
-    std::vector<sf::Text>::iterator iter;
+    std::vector<CEGUI::Window*>::iterator iter;
     for(iter=m_credit_lines.begin(); iter != m_credit_lines.end(); iter++) {
         // get object
-        sf::Text& text = *iter;
+        CEGUI::Window* text = *iter;
 
         // set shadow if not set
         // OLD if (obj->m_shadow_pos == 0) {
         // OLD     obj->Set_Shadow(grey, 1);
         // OLD }
         // set position
-        text.setPosition(static_cast<float>(game_res_w) / 3, m_menu_pos_y);
+        text->setPosition(CEGUI::UVector2(CEGUI::UDim(0.3f, 0.0f), CEGUI::UDim(0, pos_y)));
 
-        m_menu_pos_y = text.getPosition().y + text.getGlobalBounds().height + 10;
+        pos_y += 20.0f * global_upscaley;
     }
 
-    pFont->Prepare_SFML_Text(m_back_text, _("Back"), static_cast<float>(game_res_w) / 18, 400, cFont_Manager::FONTSIZE_NORMAL, m_text_color, true);
-    m_back_index = pMenuCore
-        ->m_handler
-        ->Add_Menu_Item(sf::FloatRect(m_back_text.getPosition().x * global_downscalex,
-                                      m_back_text.getPosition().y * global_downscaley,
-                                      m_back_text.getGlobalBounds().width * global_downscalex,
-                                      m_back_text.getGlobalBounds().height * global_downscaley), NULL);
     Init_GUI();
 }
 
@@ -3592,13 +3585,18 @@ void cMenu_Credits::Update(void)
 {
     cMenu_Base::Update();
 
-    std::vector<sf::Text>::iterator iter;
+    CEGUI::Window* p_root = CEGUI::System::getSingleton().getDefaultGUIContext().getRootWindow();
+    CEGUI::WindowManager& wmgr = CEGUI::WindowManager::getSingleton();
+
+    std::vector<CEGUI::Window*>::iterator iter;
     for(iter=m_credit_lines.begin(); iter != m_credit_lines.end(); iter++) {
-        sf::Text& text = *iter;
+        CEGUI::Window* text = *iter;
 
         // When the respective line is long out of sight, remove it from the
         // list of lines to draw.
-        if (text.getPosition().y < -300) {
+        if (text->getYPosition().d_offset < -300) {
+            p_root->removeChild(text);
+            wmgr.destroyWindow(text);
             iter = m_credit_lines.erase(iter);
 
             // Exit loop if this was the last item (so we don't accidentally
@@ -3607,32 +3605,34 @@ void cMenu_Credits::Update(void)
                 break;
         }
         // fading out
-        else if (text.getPosition().y < game_res_h * 0.3f) {
-            sf::Color color = text.getColor();
-            unsigned int new_value = color.a - 1;
+        else if (text->getYPosition().d_offset < game_res_h * 0.3f) {
+            CEGUI::ColourRect colrect = CEGUI::PropertyHelper<CEGUI::ColourRect>::fromString(text->getProperty("TextColours"));
+            CEGUI::Colour color = colrect.getColourAtPoint(0.0f, 0.0f); // Entire rect has one colour
+            float new_value = color.getAlpha() - 0.01;
 
-            if (new_value < 0) {
-                new_value = 0;
+            if (new_value < 0.0f) {
+                new_value = 0.0f;
             }
 
-            color.a = new_value;
-            text.setColor(color);
+            colrect.setAlpha(new_value);
+            text->setProperty("TextColours", CEGUI::PropertyHelper<CEGUI::ColourRect>::toString(colrect));
         }
         // fading in
-        else if (text.getPosition().y < game_res_h * 0.9f) {
-            sf::Color color = text.getColor();
-            unsigned int new_value = color.a + 2;
+        else if (text->getYPosition().d_offset < game_res_h * 0.9f) {
+            CEGUI::ColourRect colrect = CEGUI::PropertyHelper<CEGUI::ColourRect>::fromString(text->getProperty("TextColours"));
+            CEGUI::Colour color = colrect.getColourAtPoint(0.0f, 0.0f); // Entire rect has one colour
+            float new_value = color.getAlpha() + 0.02;
 
-            if (new_value > 255) {
-                new_value = 255;
+            if (new_value > 1.0f) {
+                new_value = 1.0f;
             }
 
-            color.a = new_value;
-            text.setColor(color);
+            colrect.setAlpha(new_value);
+            text->setProperty("TextColours", CEGUI::PropertyHelper<CEGUI::ColourRect>::toString(colrect));
         }
 
         // default upwards scroll
-        text.move(0, -1.0f);
+        text->setYPosition(text->getYPosition() - CEGUI::UDim::px());
     }
 
     if (rand() % 100 > 95) {
@@ -3683,19 +3683,8 @@ void cMenu_Credits::Update(void)
         Exit();
     }
 
-    if (pMenuCore->m_handler->m_active == m_back_index)
-        m_back_text.setColor(red.Get_SFML_Color());
-    else
-        m_back_text.setColor(m_text_color.Get_SFML_Color());
-
-    if (!m_action) {
-        return;
-    }
-
-    m_action = false;
-
-    // back
-    if (pMenuCore->m_handler->m_active == 0) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape) || sf::Keyboard::isKeyPressed(sf::Keyboard::Return) ||
+            pJoystick->Button(pPreferences->m_joy_button_action) || pJoystick->Button(pPreferences->m_joy_button_exit)) {
         Exit();
     }
 }
@@ -3718,20 +3707,24 @@ void cMenu_Credits::Draw(void)
     request->m_color.alpha = 195;
     pRenderer->Add(request);
 
-    std::vector<sf::Text>::iterator iter;
-    for(iter=m_credit_lines.begin(); iter != m_credit_lines.end(); iter++) {
-        pFont->Queue_Text(*iter);
-    }
-
-    pFont->Queue_Text(m_back_text);
-
     Draw_End();
 }
 
 void cMenu_Credits::Add_Credits_Line(const std::string& text, float posx, float posy, const Color& color /* = black */, float shadow_pos /* = 0.0f */, const Color& shadow_color /* = black */)
 {
-    m_credit_lines.resize(m_credit_lines.size() + 1);
-    pFont->Prepare_SFML_Text(m_credit_lines.back(), text, posx, posy, cFont_Manager::FONTSIZE_NORMAL, color, true);
+    CEGUI::ColourRect colrect(color.Get_cegui_Color());
+    CEGUI::String strcolrect = CEGUI::PropertyHelper<CEGUI::ColourRect>::toString(colrect);
+
+    CEGUI::Window* p_line = CEGUI::WindowManager::getSingleton().createWindow("TaharezLook/StaticText");
+    p_line->setText(text);
+    p_line->setProperty("FrameEnabled", "False");
+    p_line->setProperty("BackgroundEnabled", "False");
+    p_line->setProperty("TextColours", strcolrect);
+    p_line->setSize(CEGUI::USize(CEGUI::UDim(1.0f, 0.0f), CEGUI::UDim(0.05f, 0)));
+    p_line->setPosition(CEGUI::UVector2(CEGUI::UDim(0.0f, posx), CEGUI::UDim(0.0f, posy)));
+
+    m_credit_lines.push_back(p_line);
+    CEGUI::System::getSingleton().getDefaultGUIContext().getRootWindow()->addChild(p_line);
 }
 
 void cMenu_Credits::Menu_Fade(bool fade_in /* = 1 */)

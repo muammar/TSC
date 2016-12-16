@@ -46,6 +46,7 @@
 #include "../core/editor/editor.hpp"
 #include "../level/level_editor.hpp"
 #include "../gui/hud.hpp"
+#include "../gui/game_console.hpp"
 
 namespace TSC {
 
@@ -618,8 +619,8 @@ void cLevel_Player::Update_Walking(void)
         Reset_On_Ground();
     }
 
-    // only if left or right is pressed
-    if (sf::Keyboard::isKeyPressed(pPreferences->m_key_left) || sf::Keyboard::isKeyPressed(pPreferences->m_key_right) || pJoystick->Left() || pJoystick->Right()) {
+    // only if left or right is pressed, and game console is not open
+    if ((sf::Keyboard::isKeyPressed(pPreferences->m_key_left) || sf::Keyboard::isKeyPressed(pPreferences->m_key_right) || pJoystick->Left() || pJoystick->Right()) && !gp_game_console->IsVisible()) {
         float ground_mod = 1.0f;
 
         if (m_ground_object && m_ground_object->m_image) {
@@ -1133,8 +1134,7 @@ bool cLevel_Player::Is_On_Climbable(float move_y /* = 0.0f */)
 void cLevel_Player::Start_Jump_Keytime(void)
 {
     if (m_god_mode || m_state == STA_STAY || m_state == STA_WALK || m_state == STA_RUN
-        || m_state == STA_FALL || m_state == STA_FLY || m_state == STA_JUMP || (m_state == STA_CLIMB &&
-        !sf::Keyboard::isKeyPressed(pPreferences->m_key_up) && !pJoystick->Up())) {
+        || m_state == STA_FALL || m_state == STA_FLY || m_state == STA_JUMP || m_state == STA_CLIMB) {
         m_up_key_time = speedfactor_fps / 4;
     }
 }
@@ -1178,7 +1178,7 @@ void cLevel_Player::Start_Jump(float deaccel /* = 0.08f */)
     bool jump_key = 0;
 
     // if jump key pressed
-    if (sf::Keyboard::isKeyPressed(pPreferences->m_key_jump) || (pPreferences->m_joy_analog_jump && pJoystick->Up()) || pJoystick->Button(pPreferences->m_joy_button_jump)) {
+    if (sf::Keyboard::isKeyPressed(pPreferences->m_key_jump) || pJoystick->Button(pPreferences->m_joy_button_jump)) {
         jump_key = 1;
     }
 
@@ -1261,7 +1261,7 @@ void cLevel_Player::Update_Jump(void)
     }
 
     // jumping physics
-    if (sf::Keyboard::isKeyPressed(pPreferences->m_key_jump) || (pPreferences->m_joy_analog_jump && pJoystick->Up()) || pJoystick->Button(pPreferences->m_joy_button_jump)) {
+    if (sf::Keyboard::isKeyPressed(pPreferences->m_key_jump) || pJoystick->Button(pPreferences->m_joy_button_jump)) {
         Add_Velocity_Y(-(m_jump_accel_up + (m_vely * m_jump_vel_deaccel) / Get_Vel_Modifier()));
         m_jump_power -= pFramerate->m_speed_factor;
     }
